@@ -1,7 +1,8 @@
-const { StitchQuery } = require('./transforms/StitchQuery');
+const { DataSource } = require('apollo-datasource');
 const { delegateToSchema } = require('graphql-tools');
+const { StitchQuery } = require('./transforms/StitchQuery');
 
-class Stitcher {
+class Stitcher extends DataSource {
   constructor({
     schema,
     context,
@@ -9,16 +10,20 @@ class Stitcher {
     preStitchFragmentName = 'PreStitch',
     transforms = []
   }) {
+    super();
     this.stitchOptions = {
       schema,
       context,
+      info,
       transforms
     };
 
-    if (info) this.stitchOptions.info = { ...info };
-
     this.preStitchFragmentName = preStitchFragmentName;
     this.fromStitch = {};
+  }
+
+  initialize(config) {
+    this.stitchOptions.context = config.context;
   }
 
   from(options) {

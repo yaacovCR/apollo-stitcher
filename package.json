@@ -9,6 +9,9 @@
   "author": "Yaacov Rydzinski",
   "license": "MIT",
   "dependencies": {
+    "apollo-datasource": "^0.3.1",
+    "apollo-link": "^1.2.11",
+    "apollo-utilities": "^1.2.1",
     "graphql": "^14.1.1",
     "graphql-tag": "^2.10.1",
     "graphql-tools": "^4.0.4"
