@@ -19,6 +19,16 @@ class GraphQLContextLink extends ApolloLink {
   }
 }
 
+/**
+ * Polyfill for makeRemoteExecutableSchema from graphql-tools that allows specification of a context-dependent link or fetcher.
+ * @memberof module:apollo-stitcher
+ * @alias makeRemoteExecutableSchema
+ * @param {object} options - standard options object for makeRemoteExecutableSchema.
+ * @param {string} options.dispatcher - new property representing a function taking the graphql request
+ * context as a single parameter and returning a link or fetcher, designed to be used instead of the
+ * link and fetcher properties.
+ * @returns {GraphQLSchema} executable graphql schema
+ */
 function makeContextualRemoteExecutableSchema({ link, dispatcher, ...rest }) {
   const options = {
     link: dispatcher ? new GraphQLContextLink(dispatcher) : link,
