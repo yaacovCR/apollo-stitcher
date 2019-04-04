@@ -1,8 +1,8 @@
 {
   "name": "apollo-stitcher",
-  "version": "1.0.0",
-  "description": "fluent api for schema stitching",
+  "version": "0.1.0",
   "main": "src/index.js",
+  "files": [ "/src" ],
   "scripts": {
     "doc": "jsdoc -c jsdoc.conf.json",
     "test": "mocha test"
