@@ -342,7 +342,7 @@
     
 
     
-    <h4 class="name" id="execute"><span class="type-signature"></span>execute<span class="signature">(info|options)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="execute"><span class="type-signature"></span>execute<span class="signature">(options)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
     
 
     
@@ -350,7 +350,7 @@
 
 
 <div class="description">
-    Creates a new Stitcher object based on the original Stitcher object settings. This function isdesigned to allow adding the query information prior to stitching. It takes a single parameter,either an info object or an options object with the info property set.
+    Directly executes a query without stitching an info object.
 </div>
 
 
@@ -386,7 +386,7 @@
 
         <tr>
             
-                <td class="name"><code>info|options</code></td>
+                <td class="name"><code>options</code></td>
             
 
             <td class="type">
@@ -402,7 +402,7 @@
 
             
 
-            <td class="description last">Either a graphql info object providing information about the queryexecution, or an options object with an info property set to the graphql info object, see below.
+            <td class="description last">options for schema delegation to the specified target field.
                 <h6>Properties</h6>
                 
 
@@ -430,13 +430,13 @@
 
         <tr>
             
-                <td class="name"><code>info</code></td>
+                <td class="name"><code>operation</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">object</span>
+<span class="param-type">string</span>
 
 
             
@@ -454,14 +454,45 @@
 
             
 
-            <td class="description last">a graphql info object providing information about the query execution.When specifying no other options, one can pass the info object itself instead of the optionsobject.</td>
+            <td class="description last">one of 'query', 'mutation', or 'subscription'.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>context</code></td>
+                <td class="name"><code>fieldName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">root field name on target schema.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>args</code></td>
             
 
             <td class="type">
@@ -487,7 +518,112 @@
 
             
 
-            <td class="description last">a graphql context object to be passed to the executable schema.If the Stitcher class is used as a datasource, the context will be automatically provided on datasource initialization, but can be overridden.</td>
+            <td class="description last">named arguments for the query.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>selectionSet</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+|
+
+<span class="param-type">object</span>
+|
+
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">a selection set specified as graphql SDLor as an AST. Alternatively, selectionSet may represent a function that returns a post-"stitch" selection set.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>extractor</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">function</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">a function that takes the result as a parameter andreturns the desired result, for use in combination with selectionSet to wrap queries prior tostitching and unwrap the result.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>transforms</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;object></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">additional transforms to be added for this "stitch."</td>
         </tr>
 
     
@@ -843,7 +979,7 @@
     
 
     
-    <h4 class="name" id="stitch"><span class="type-signature"></span>stitch<span class="signature">(info|options)</span><span class="type-signature"> &rarr; {Stitcher}</span></h4>
+    <h4 class="name" id="stitch"><span class="type-signature"></span>stitch<span class="signature">(info<span class="signature-attributes">opt</span>, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Stitcher}</span></h4>
     
 
     
@@ -851,7 +987,7 @@
 
 
 <div class="description">
-    Creates a new Stitcher object based on the original Stitcher object settings. This function isdesigned to allow adding the query information prior to stitching. It takes a single parameter,either an info object or an options object with the info property set.
+    Creates a new Stitcher object based on the original Stitcher object settings. This function isdesigned to allow adding the query information prior to stitching. It takes a single parameter,either an info object or an options object with the info property set. When specifying no otheroptions, one can pass the info object itself instead of the options object.
 </div>
 
 
@@ -875,6 +1011,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -887,7 +1025,7 @@
 
         <tr>
             
-                <td class="name"><code>info|options</code></td>
+                <td class="name"><code>info</code></td>
             
 
             <td class="type">
@@ -900,10 +1038,53 @@
             </td>
 
             
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">Either a graphql info object providing information about the queryexecution, or an options object with an info property set to the graphql info object, see below.
+            <td class="description last">a graphql info object providing information about the query execution.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">an options object with an info property set to the graphql info object.
                 <h6>Properties</h6>
                 
 
@@ -955,7 +1136,7 @@
 
             
 
-            <td class="description last">a graphql info object providing information about the query execution.When specifying no other options, one can pass the info object itself instead of the optionsobject.</td>
+            <td class="description last">a graphql info object providing information about the queryexecution.</td>
         </tr>
 
     
@@ -1483,7 +1664,7 @@
 <br class="clear">
 
 <footer>
-    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Thu Apr 04 2019 12:54:16 GMT-0400 (Eastern Daylight Time)
+    Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.5.5</a> on Tue Apr 16 2019 12:38:10 GMT-0400 (Eastern Daylight Time)
 </footer>
 
 <script> prettyPrint(); </script>

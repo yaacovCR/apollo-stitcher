@@ -122,13 +122,13 @@ class Stitcher extends DataSource {
 
   /** Creates a new Stitcher object based on the original Stitcher object settings. This function is
    * designed to allow adding the query information prior to stitching. It takes a single parameter,
-   * either an info object or an options object with the info property set.
-   * @param {object} info|options - Either a graphql info object providing information about the query
-   * execution, or an options object with an info property set to the graphql info object, see below.
-   * @param {object} info.info - a graphql info object providing information about the query execution.
-   * When specifying no other options, one can pass the info object itself instead of the options
-   * object.
-   * @param {object} [info.context] - a graphql context object to be passed to the executable schema.
+   * either an info object or an options object with the info property set. When specifying no other
+   * options, one can pass the info object itself instead of the options object.
+   * @param {object} [info] - a graphql info object providing information about the query execution.
+   * @param {object} [options] - an options object with an info property set to the graphql info object.
+   * @param {object} options.info - a graphql info object providing information about the query
+   * execution.
+   * @param {object} [options.context] - a graphql context object to be passed to the executable schema.
    * If the Stitcher class is used as a datasource, the context will be automatically provided on data
    * source initialization, but can be overridden.
    * @returns {Stitcher} a Stitcher object instance for chaining.
@@ -141,17 +141,17 @@ class Stitcher extends DataSource {
     });
   }
 
-  /** Creates a new Stitcher object based on the original Stitcher object settings. This function is
-   * designed to allow adding the query information prior to stitching. It takes a single parameter,
-   * either an info object or an options object with the info property set.
-   * @param {object} info|options - Either a graphql info object providing information about the query
-   * execution, or an options object with an info property set to the graphql info object, see below.
-   * @param {object} info.info - a graphql info object providing information about the query execution.
-   * When specifying no other options, one can pass the info object itself instead of the options
-   * object.
-   * @param {object} [info.context] - a graphql context object to be passed to the executable schema.
-   * If the Stitcher class is used as a datasource, the context will be automatically provided on data
-   * source initialization, but can be overridden.
+  /** Directly executes a query without stitching an info object.
+   * @param {object} options - options for schema delegation to the specified target field.
+   * @param {string} options.operation - one of 'query', 'mutation', or 'subscription'.
+   * @param {string} options.fieldName - root field name on target schema.
+   * @param {object} [options.args] named arguments for the query.
+   * @param {string|object|function} [options.selectionSet] - a selection set specified as graphql SDL
+   * or as an AST. Alternatively, selectionSet may represent a function that returns a post-"stitch" selection set.
+   * @param {function} [options.extractor] - a function that takes the result as a parameter and
+   * returns the desired result, for use in combination with selectionSet to wrap queries prior to
+   * stitching and unwrap the result.
+   * @param {object[]} [options.transforms] - additional transforms to be added for this "stitch."
    * @returns {Promise} a promise that will resolve to the graphql result.
    */
   execute(options) {
