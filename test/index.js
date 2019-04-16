@@ -37,7 +37,7 @@ describe('stitcher', () => {
       expect(result.authorId).to.exist;
     });
 
-    it('works with subscriptions', done => {
+    it('works with subscriptions', async () => {
       const mockNotification = {
         notifications: {
           text: 'Hello world'
@@ -52,16 +52,14 @@ describe('stitcher', () => {
         }
       `);
 
-      let notificationCnt = 0;
-      subscribe(mergedSubscriptionSchema, subscription).then(results => {
-        forAwaitEach(results, result => {
-          expect(result).to.have.property('data');
-          expect(result.data).to.deep.equal(mockNotification);
-          !notificationCnt++ ? done() : null;
-        });
-      }).then(() => {
-        subscriptionPubSub.publish(subscriptionPubSubTrigger, mockNotification);
-      });
+      const subIterator = await subscribe(mergedSubscriptionSchema, subscription);
+      const promiseIterableResult = subIterator.next();
+
+      subscriptionPubSub.publish(subscriptionPubSubTrigger, mockNotification);
+      
+      const result = (await promiseIterableResult).value;
+      expect(result).to.have.property('data');
+      expect(result.data).to.deep.equal(mockNotification);
     });
   });
 });
