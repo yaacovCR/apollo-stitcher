@@ -1,11 +1,15 @@
 const { expect } = require('chai');
-const { subscribe, parse } = require('graphql');
+const { execute, subscribe, parse } = require('graphql');
 const {
   subscriptionPubSub,
   subscriptionPubSubTrigger,
   mergedSchema,
-  mergedSubscriptionSchema
+  chirpSchema,
+  authorSchema,
+  subscriptionSchema,
+  delegatingSubscriptionSchema
 } = require('./testingSchemas');
+const gql = require('graphql-tag');
 const { Stitcher } = require('../src/Stitcher');
 
 describe('stitcher', () => {
@@ -16,6 +20,50 @@ describe('stitcher', () => {
 
     it('should be instantiatable with a target schema', () => {
       expect(() => new Stitcher({ schema: mergedSchema })).to.not.throw;
+    });
+
+    it('should work', async () => {
+      const document = gql`
+        query ChirpById($id: ID!) {
+          chirpById(id: $id) {
+            id
+            text
+            author {
+              id
+              email
+              chirps {
+                id
+                text
+                author {
+                  id
+                  email
+                }
+              }
+            }
+          }
+        }
+      `;
+
+      const result = await execute({
+        schema: mergedSchema,
+        document,
+        contextValue: {
+          chirpStitcher: new Stitcher({ schema: chirpSchema }),
+          authorStitcher: new Stitcher({ schema: authorSchema })
+        },
+        variableValues: {
+          id: '0'
+        }
+      });
+
+      expect(result).to.exist;
+      expect(result.data).to.exist;
+      expect(result.data.chirpById).to.exist;
+      expect(result.data.chirpById.id).to.exist;
+      expect(result.data.chirpById.text).to.exist;
+      expect(result.data.chirpById.author).to.exist;
+      expect(result.data.chirpById.author.id).to.exist;
+      expect(result.data.chirpById.author.email).to.exist;
     });
 
     it('should allow direct execution', async () => {
@@ -30,6 +78,7 @@ describe('stitcher', () => {
           authorId
         }`
       });
+
       expect(result).to.exist;
       expect(result.id).to.exist;
       expect(result.text).to.exist;
@@ -43,20 +92,26 @@ describe('stitcher', () => {
         }
       };
 
-      const subscription = parse(`
-        subscription Subscription {
+      const document = gql`
+        subscription Notifications {
           notifications {
             text
           }
         }
-      `);
+      `;
 
-      const subIterator = await subscribe(mergedSubscriptionSchema, subscription);
+      const subIterator = await subscribe({
+        schema: delegatingSubscriptionSchema,
+        document,
+        contextValue: {
+          subscriptionStitcher: new Stitcher({ schema: subscriptionSchema })
+        }
+      });
+
       const promiseIterableResult = subIterator.next();
-
       subscriptionPubSub.publish(subscriptionPubSubTrigger, mockNotification);
-      
       const result = (await promiseIterableResult).value;
+      
       expect(result).to.have.property('data');
       expect(result.data).to.deep.equal(mockNotification);
     });

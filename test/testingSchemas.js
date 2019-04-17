@@ -55,15 +55,12 @@ const mergedSchema = mergeSchemas({
       chirps: {
         fragment: `... on User { id }`,
         resolve(user, args, context, info) {
-          return info.mergeInfo.delegateToSchema({
-            schema: chirpSchema,
+          return context.chirpStitcher.stitch({ info, context }).to({
             operation: 'query',
             fieldName: 'chirpsByAuthorId',
             args: {
               authorId: user.id
-            },
-            context,
-            info
+            }
           });
         }
       }
@@ -72,15 +69,12 @@ const mergedSchema = mergeSchemas({
       author: {
         fragment: `... on Chirp { authorId }`,
         resolve(chirp, args, context, info) {
-          return info.mergeInfo.delegateToSchema({
-            schema: authorSchema,
+          return context.authorStitcher.stitch({ info, context }).to({
             operation: 'query',
             fieldName: 'userById',
             args: {
               id: chirp.authorId
-            },
-            context,
-            info
+            }
           });
         }
       }
@@ -91,7 +85,6 @@ const mergedSchema = mergeSchemas({
 const subscriptionTypeDefs = gql`
   type Notification {
     text: String
-    throwError: String
   }
   type Query {
     notifications: Notification
@@ -113,11 +106,6 @@ const subscriptionResolvers = {
       subscribe: () =>
         subscriptionPubSub.asyncIterator(subscriptionPubSubTrigger)
     }
-  },
-  Notification: {
-    throwError: () => {
-      throw new Error('subscription field error');
-    }
   }
 };
 
@@ -126,8 +114,23 @@ const subscriptionSchema = makeExecutableSchema({
   resolvers: subscriptionResolvers
 });
 
-const mergedSubscriptionSchema = mergeSchemas({
-  schemas: [subscriptionSchema]
+const delegatingSubscriptionSchema = makeExecutableSchema({
+  typeDefs: subscriptionTypeDefs,
+  resolvers: {
+    Query: {
+      notifications: () => ({ text: 'Hello world' })
+    },
+    Subscription: {
+      notifications: {
+        subscribe: (user, arg, context, info) => {
+          return context.subscriptionStitcher.stitch({ info, context }).to({
+            operation: 'subscription',
+            fieldName: 'notifications'
+          });
+        }
+      }
+    }
+  }
 });
 
 module.exports = {
@@ -137,5 +140,5 @@ module.exports = {
   subscriptionPubSub,
   subscriptionPubSubTrigger,
   subscriptionSchema,
-  mergedSubscriptionSchema
+  delegatingSubscriptionSchema
 };
