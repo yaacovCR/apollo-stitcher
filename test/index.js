@@ -1,5 +1,4 @@
 const { expect } = require('chai');
-const { forAwaitEach } = require('iterall');
 const { subscribe, parse } = require('graphql');
 const {
   subscriptionPubSub,
