@@ -15,7 +15,13 @@ function extractOneLevelOfFields(fieldNodes, fieldName, fragments) {
           return selection;
       }
     })
-    .flat()
+    .reduce(
+      (acc, selectionOrSelections) =>
+        Array.isArray(selectionOrSelections)
+          ? [...acc, ...selectionOrSelections]
+          : [...acc, selectionOrSelections],
+      []
+    )
     .filter(
       selection =>
         selection.kind === Kind.FIELD &&
@@ -24,7 +30,7 @@ function extractOneLevelOfFields(fieldNodes, fieldName, fragments) {
         selection.selectionSet.selections
     )
     .map(selection => selection.selectionSet.selections)
-    .flat();
+    .reduce((acc, selections) => [...acc, ...selections], []);
 
   return newFieldNodes;
 }

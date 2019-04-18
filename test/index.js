@@ -64,6 +64,39 @@ describe('stitcher', () => {
       expect(result.data.chirpById.author).to.exist;
       expect(result.data.chirpById.author.id).to.exist;
       expect(result.data.chirpById.author.email).to.exist;
+      expect(result.data.chirpById.author.chirps).to.exist;
+    });
+
+    it('should work when extracting, wrapping, and adding fields', async () => {
+      const document = gql`
+        query LatestAddress($id: ID!) {
+          userById(id: $id) {
+            latestDetails {
+              address {
+                street
+              }
+            }
+          }
+        }
+      `;
+
+      const result = await execute({
+        schema: mergedSchema,
+        document,
+        contextValue: {
+          authorStitcher: new Stitcher({ schema: authorSchema })
+        },
+        variableValues: {
+          id: '0'
+        }
+      });
+
+      expect(result).to.exist;
+      expect(result.data).to.exist;
+      expect(result.data.userById).to.exist;
+      expect(result.data.userById.latestDetails).to.exist;
+      expect(result.data.userById.latestDetails.address).to.exist;
+      expect(result.data.userById.latestDetails.address.street).to.exist;
     });
 
     it('should allow direct execution', async () => {
@@ -111,7 +144,7 @@ describe('stitcher', () => {
       const promiseIterableResult = subIterator.next();
       subscriptionPubSub.publish(subscriptionPubSubTrigger, mockNotification);
       const result = (await promiseIterableResult).value;
-      
+
       expect(result).to.have.property('data');
       expect(result.data).to.deep.equal(mockNotification);
     });

@@ -28,6 +28,19 @@ const authorSchema = makeExecutableSchema({
     type User {
       id: ID!
       email: String
+      demographics: Demographics
+    }
+
+    type Demographics {
+      address: Address
+    }
+
+    type Address {
+      street: String
+      city: String
+      state: String
+      country: String
+      zipCode: String
     }
 
     type Query {
@@ -41,6 +54,11 @@ addMockFunctionsToSchema({ schema: authorSchema });
 const linkTypeDefs = gql`
   extend type User {
     chirps: [Chirp]
+    latestDetails: Details
+  }
+
+  type Details {
+    address: Address
   }
 
   extend type Chirp {
@@ -62,6 +80,33 @@ const mergedSchema = mergeSchemas({
               authorId: user.id
             }
           });
+        }
+      },
+      latestDetails: {
+        fragment: `... on User { id }`,
+        resolve(user, args, context, info) {
+          return {
+            address: context.authorStitcher
+              .stitch({ info, context })
+              .from({
+                path: ['address']
+              })
+              .to({
+                operation: 'query',
+                fieldName: 'userById',
+                args: {
+                  id: user.id
+                },
+                selectionSet: `{
+                  demographics {
+                    address {
+                      ...PreStitch
+                    }
+                  }
+                }`,
+                extractor: result => result && result.demographics && result.demographics.address
+              })
+          };
         }
       }
     },
