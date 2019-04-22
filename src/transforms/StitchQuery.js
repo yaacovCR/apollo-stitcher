@@ -1,5 +1,4 @@
-const { Kind, visit } = require('graphql');
-const gql = require('graphql-tag');
+const { Kind, visit, parse } = require('graphql');
 const { WrapQuery } = require('graphql-tools');
 
 function extractOneLevelOfFields(fieldNodes, fieldName, fragments) {
@@ -82,7 +81,7 @@ function updateSelectionSet(
     case 'function':
       return selectionSet(oldSelectionSet);
     case 'string':
-      const document = gql(selectionSet);
+      const document = parse(selectionSet);
       selectionSet = document.definitions[0].selectionSet;
     default:
       return mergeSelectionSets(

@@ -3,11 +3,11 @@ const {
   addMockFunctionsToSchema,
   mergeSchemas
 } = require('graphql-tools');
-const gql = require('graphql-tag');
+const { parse } = require('graphql');
 const { PubSub } = require('graphql-subscriptions');
 
 const chirpSchema = makeExecutableSchema({
-  typeDefs: gql`
+  typeDefs: parse(`
     type Chirp {
       id: ID!
       text: String
@@ -18,13 +18,13 @@ const chirpSchema = makeExecutableSchema({
       chirpById(id: ID!): Chirp
       chirpsByAuthorId(authorId: ID!): [Chirp]
     }
-  `
+  `)
 });
 
 addMockFunctionsToSchema({ schema: chirpSchema });
 
 const authorSchema = makeExecutableSchema({
-  typeDefs: gql`
+  typeDefs: parse(`
     type User {
       id: ID!
       email: String
@@ -46,12 +46,12 @@ const authorSchema = makeExecutableSchema({
     type Query {
       userById(id: ID!): User
     }
-  `
+  `)
 });
 
 addMockFunctionsToSchema({ schema: authorSchema });
 
-const linkTypeDefs = gql`
+const linkTypeDefs = parse(`
   extend type User {
     chirps: [Chirp]
     latestDetails: Details
@@ -64,7 +64,7 @@ const linkTypeDefs = gql`
   extend type Chirp {
     author: User
   }
-`;
+`);
 
 const mergedSchema = mergeSchemas({
   schemas: [chirpSchema, authorSchema, linkTypeDefs],
@@ -127,7 +127,7 @@ const mergedSchema = mergeSchemas({
   }
 });
 
-const subscriptionTypeDefs = gql`
+const subscriptionTypeDefs = parse(`
   type Notification {
     text: String
   }
@@ -137,7 +137,7 @@ const subscriptionTypeDefs = gql`
   type Subscription {
     notifications: Notification
   }
-`;
+`);
 
 const subscriptionPubSub = new PubSub();
 const subscriptionPubSubTrigger = 'pubSubTrigger';

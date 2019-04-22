@@ -9,7 +9,6 @@ const {
   subscriptionSchema,
   delegatingSubscriptionSchema
 } = require('./testingSchemas');
-const gql = require('graphql-tag');
 const { Stitcher } = require('../src/Stitcher');
 
 describe('stitcher', () => {
@@ -23,7 +22,7 @@ describe('stitcher', () => {
     });
 
     it('should work', async () => {
-      const document = gql`
+      const document = parse(`
         query ChirpById($id: ID!) {
           chirpById(id: $id) {
             id
@@ -42,7 +41,7 @@ describe('stitcher', () => {
             }
           }
         }
-      `;
+      `);
 
       const result = await execute({
         schema: mergedSchema,
@@ -68,7 +67,7 @@ describe('stitcher', () => {
     });
 
     it('should work when extracting, wrapping, and adding fields', async () => {
-      const document = gql`
+      const document = parse(`
         query LatestAddress($id: ID!) {
           userById(id: $id) {
             latestDetails {
@@ -78,7 +77,7 @@ describe('stitcher', () => {
             }
           }
         }
-      `;
+      `);
 
       const result = await execute({
         schema: mergedSchema,
@@ -125,13 +124,13 @@ describe('stitcher', () => {
         }
       };
 
-      const document = gql`
+      const document = parse(`
         subscription Notifications {
           notifications {
             text
           }
         }
-      `;
+      `);
 
       const subIterator = await subscribe({
         schema: delegatingSubscriptionSchema,
