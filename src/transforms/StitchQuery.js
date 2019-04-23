@@ -1,32 +1,40 @@
 const { Kind, visit, parse } = require('graphql');
 const { WrapQuery } = require('graphql-tools');
 
+function selectionHasFieldWithSelections(selection, fieldName) {
+  return (
+    selection.kind === Kind.FIELD &&
+    selection.name.value === fieldName &&
+    selection.selectionSet &&
+    selection.selectionSet.selections
+  );
+}
+
 function extractOneLevelOfFields(fieldNodes, fieldName, fragments) {
-  const newFieldNodes = fieldNodes
-    .reduce((acc, selection) => {
-      switch (selection.kind) {
-        case Kind.INLINE_FRAGMENT:
-          return [...acc, ...selection.selectionSet.selections];
-        case Kind.FRAGMENT_SPREAD:
-          return [
-            ...acc,
-            ...fragments[selection.name.value].selectionSet.selections
-          ];
-        case Kind.FIELD:
-        default:
-          return [...acc, selection];
-      }
-    }, [])
-    .reduce((acc, selection) => {
-      if (
-        selection.kind === Kind.FIELD &&
-        selection.name.value === fieldName &&
-        selection.selectionSet &&
-        selection.selectionSet.selections
-      )
-        return [...acc, ...selection.selectionSet.selections];
-      else return acc;
-    }, []);
+  let newFieldNodes = [];
+
+  fieldNodes.forEach(node => {
+    if (node.kind === Kind.FIELD) {
+      if (selectionHasFieldWithSelections(node, fieldName))
+        newFieldNodes.push(node.selectionSet.selections);
+      return;
+    }
+
+    let newNodes;
+    switch (node.kind) {
+      case Kind.INLINE_FRAGMENT:
+        newNodes = node.selectionSet.selections;
+      case Kind.FRAGMENT_SPREAD:
+        newNodes = fragments[node.name.value].selectionSet.selections;
+    }
+
+    if (newNodes) {
+      newNodes.forEach(node => {
+        if (selectionHasFieldWithSelections(node, fieldName))
+          newFieldNodes.push(node.selectionSet.selections);
+      });
+    }
+  });
 
   return newFieldNodes;
 }
