@@ -3,33 +3,30 @@ const { WrapQuery } = require('graphql-tools');
 
 function extractOneLevelOfFields(fieldNodes, fieldName, fragments) {
   const newFieldNodes = fieldNodes
-    .map(selection => {
+    .reduce((acc, selection) => {
       switch (selection.kind) {
         case Kind.INLINE_FRAGMENT:
-          return selection.selectionSet.selections;
+          return [...acc, ...selection.selectionSet.selections];
         case Kind.FRAGMENT_SPREAD:
-          return fragments[selection.name.value].selectionSet.selections;
+          return [
+            ...acc,
+            ...fragments[selection.name.value].selectionSet.selections
+          ];
         case Kind.FIELD:
         default:
-          return selection;
+          return [...acc, selection];
       }
-    })
-    .reduce(
-      (acc, selectionOrSelections) =>
-        Array.isArray(selectionOrSelections)
-          ? [...acc, ...selectionOrSelections]
-          : [...acc, selectionOrSelections],
-      []
-    )
-    .filter(
-      selection =>
+    }, [])
+    .reduce((acc, selection) => {
+      if (
         selection.kind === Kind.FIELD &&
         selection.name.value === fieldName &&
         selection.selectionSet &&
         selection.selectionSet.selections
-    )
-    .map(selection => selection.selectionSet.selections)
-    .reduce((acc, selections) => [...acc, ...selections], []);
+      )
+        return [...acc, ...selection.selectionSet.selections];
+      else return acc;
+    }, []);
 
   return newFieldNodes;
 }
