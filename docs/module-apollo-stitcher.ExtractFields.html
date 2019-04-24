@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>JSDoc: Module: apollo-stitcher</title>
+    <title>JSDoc: Class: ExtractFields</title>
 
     <script src="scripts/prettify/prettify.js"> </script>
     <script src="scripts/prettify/lang-css.js"> </script>
@@ -17,7 +17,7 @@
 
 <div id="main">
 
-    <h1 class="page-title">Module: apollo-stitcher</h1>
+    <h1 class="page-title">Class: ExtractFields</h1>
 
     
 
@@ -28,6 +28,10 @@
 
 <header>
     
+        <h2><span class="attribs"><span class="type-signature"></span></span>
+            <span class="ancestors"><a href="module-apollo-stitcher.html">apollo-stitcher</a>.</span>ExtractFields<span class="signature">(options)</span><span class="type-signature"></span></h2>
+        
+            <div class="class-description">Transform for extracting fields nested within a request to higher up within the selection sethierarchy.</div>
         
     
 </header>
@@ -37,62 +41,17 @@
     
         
 
-        
     
-    </div>
-
+    <h2>Constructor</h2>
     
 
     
-
-    
-        <h3 class="subsection-title">Classes</h3>
-
-        <dl>
-            <dt><a href="module-apollo-stitcher.ApolloClientLink.html">ApolloClientLink</a></dt>
-            <dd></dd>
-        
-            <dt><a href="module-apollo-stitcher.ExtractFields.html">ExtractFields</a></dt>
-            <dd></dd>
-        
-            <dt><a href="module-apollo-stitcher.Stitcher.html">Stitcher</a></dt>
-            <dd></dd>
-        
-            <dt><a href="module-apollo-stitcher.StitchQuery.html">StitchQuery</a></dt>
-            <dd></dd>
-        
-            <dt><a href="module-apollo-stitcher.UpdateSelectionSet.html">UpdateSelectionSet</a></dt>
-            <dd></dd>
-        </dl>
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-        <h3 class="subsection-title">Methods</h3>
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="makeRemoteExecutableSchema"><span class="type-signature"></span>makeRemoteExecutableSchema<span class="signature">(options)</span><span class="type-signature"> &rarr; {GraphQLSchema}</span></h4>
+    <h4 class="name" id="ExtractFields"><span class="type-signature"></span>new ExtractFields<span class="signature">(options)</span><span class="type-signature"></span></h4>
     
 
     
 
 
-
-<div class="description">
-    Polyfill for makeRemoteExecutableSchema from graphql-tools that allows specification of a context-dependent link or fetcher.
-</div>
 
 
 
@@ -143,7 +102,7 @@
 
             
 
-            <td class="description last">standard options object for makeRemoteExecutableSchema.
+            <td class="description last">options for the transform.
                 <h6>Properties</h6>
                 
 
@@ -157,6 +116,8 @@
         <th>Type</th>
 
         
+        <th>Attributes</th>
+        
 
         
 
@@ -169,23 +130,95 @@
 
         <tr>
             
-                <td class="name"><code>dispatcher</code></td>
+                <td class="name"><code>initialPath</code></td>
             
 
             <td class="type">
             
                 
-<span class="param-type">string</span>
+<span class="param-type">Array.&lt;string></span>
 
 
             
             </td>
 
             
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
 
             
 
-            <td class="description last">new property representing a function taking the graphql requestcontext as a single parameter and returning a link or fetcher, designed to be used instead of thelink and fetcher properties.</td>
+            <td class="description last">initial portion of path to source fields; target forextracted fields.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>extractionPath</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;string></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">additional path to source fields; this path will notappear within the request after the transformation.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fragments</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">fragment definitions, necessary to allow field extraction iffields are specified as fragments.</td>
         </tr>
 
     
@@ -251,34 +284,28 @@
 
 
 
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    executable graphql schema
-</div>
 
 
 
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">GraphQLSchema</span>
 
 
-    </dd>
-</dl>
+    
+    </div>
 
     
 
+    
 
+    
 
+    
 
+    
 
-        
+    
+
+    
+
     
 
     
