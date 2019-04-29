@@ -3,7 +3,7 @@ const { parse, print, Kind } = require('graphql');
 const { StitchQuery } = require('../src/transforms/StitchQuery');
 
 describe('stitcher', () => {
-  describe.only('StitchQuery Transform', () => {
+  describe('StitchQuery Transform', () => {
     it('should be instantiatable', () => {
       expect(() => new StitchQuery()).to.not.throw;
     });
@@ -178,7 +178,8 @@ describe('stitcher', () => {
                   planet
                 }
               }
-            }`);
+            }`
+          );
 
           expect(print(transformedOperation.document)).to.equal(
             print(expectedDocument)

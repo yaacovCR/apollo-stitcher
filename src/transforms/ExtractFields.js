@@ -16,7 +16,7 @@ function extractOneLevelOfFields(fieldNodes, fieldName, fragments) {
   fieldNodes.forEach(node => {
     if (node.kind === Kind.FIELD) {
       if (selectionHasFieldWithSelections(node, fieldName))
-        newFieldNodes.push(node.selectionSet.selections);
+        newFieldNodes = newFieldNodes.concat(node.selectionSet.selections);
       return;
     }
 
@@ -31,7 +31,7 @@ function extractOneLevelOfFields(fieldNodes, fieldName, fragments) {
     if (newNodes) {
       newNodes.forEach(node => {
         if (selectionHasFieldWithSelections(node, fieldName))
-          newFieldNodes.push(node.selectionSet.selections);
+          newFieldNodes = newFieldNodes.concat(node.selectionSet.selections);
       });
     }
   });
