@@ -1,65 +1,17 @@
-const { Kind, visit, parse } = require('graphql');
+const { parse } = require('graphql');
 const { WrapQuery: TransformQuery } = require('graphql-tools');
+const { makeUpdater } = require('./makeUpdater');
 
-function updateSelectionSetViaPseudoFragment(
-  selectionSet,
-  selectionSetUpdater,
-  pseudoFragmentName
-) {
-  const newSelectionSet = visit(selectionSetUpdater, {
-    
-    [Kind.SELECTION_SET]: node => {
-      let foundFragment = false;
-      for (let selection of node.selections) {
-        if (
-          selection.kind === Kind.FRAGMENT_SPREAD &&
-          selection.name.value === pseudoFragmentName
-        ) {
-          foundFragment = true;
-          break;
-        }
-      }
-
-      if (foundFragment)
-        node.selections = node.selections.concat(selectionSet.selections);
-      
-      return node;
-    },
-
-    [Kind.FRAGMENT_SPREAD]: node => {
-      if (node.name.value === pseudoFragmentName) return null;
-    }
-
-  });
-
-  return newSelectionSet;
-}
-
-function updateSelectionSet(
-  selectionSet,
-  selectionSetUpdater,
-  pseudoFragmentName
-) {
-  let newSelectionSet = {
-    kind: Kind.SELECTION_SET,
-    selections: selectionSet ? selectionSet.selections : []
-  };
-
+function getUpdater(selectionSetUpdater, pseudoFragmentName) {
   switch (typeof selectionSetUpdater) {
     case 'function':
-      newSelectionSet = selectionSetUpdater(newSelectionSet);
+      return selectionSet => selectionSetUpdater(selectionSet);
     case 'string':
       const document = parse(selectionSetUpdater);
       selectionSetUpdater = document.definitions[0].selectionSet;
     default:
-      newSelectionSet = updateSelectionSetViaPseudoFragment(
-        newSelectionSet,
-        selectionSetUpdater,
-        pseudoFragmentName
-      );
+      return makeUpdater(selectionSetUpdater, pseudoFragmentName);
   }
-
-  return newSelectionSet;
 }
 
 /**
@@ -82,19 +34,15 @@ class UpdateSelectionSet {
    * */
   constructor({
     path,
-    selectionSet: selectionSetUpdater,
+    selectionSet,
     pseudoFragmentName = 'Original',
     extractor = result => result
   }) {
+    this.updater = getUpdater(selectionSet, pseudoFragmentName);
+
     this.transformer = new TransformQuery(
       path,
-      selectionSet => {
-        return updateSelectionSet(
-          selectionSet,
-          selectionSetUpdater,
-          pseudoFragmentName
-        );
-      },
+      selectionSet => this.updater(selectionSet),
       extractor
     );
   }
