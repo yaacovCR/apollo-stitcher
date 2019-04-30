@@ -1,6 +1,49 @@
-const { Kind, visit } = require('graphql');
+const { Kind, visit, parse } = require('graphql');
+
+function updateSelectionSet(
+  originalSelectionSet,
+  staticSelectionSet,
+  fieldLists
+) {
+  const newSelectionSet = {
+    kind: Kind.SELECTION_SET,
+    selections: staticSelectionSet.selections
+  };
+
+  fieldLists.forEach(fieldList => {
+    const node = fieldList.reduceRight((acc, field) => {
+      return {
+        kind: Kind.SELECTION_SET,
+        selections: [
+          {
+            ...field,
+            selectionSet: acc
+          }
+        ]
+      };
+    }, originalSelectionSet);
+
+    newSelectionSet.selections = newSelectionSet.selections.concat(
+      node.selections
+    );
+  });
+
+  return newSelectionSet;
+}
+
+function selectionSetToAST(selectionSet) {
+  const document = parse(selectionSet);
+  return document.definitions[0].selectionSet
+}
 
 function makeUpdater(selectionSetUpdater, pseudoFragmentName) {
+  if (typeof selectionSetUpdater === 'string')
+    selectionSetUpdater = selectionSetToAST(selectionSetUpdater);
+
+  return makeASTUpdater(selectionSetUpdater, pseudoFragmentName)
+}
+
+function makeASTUpdater(selectionSetUpdater, pseudoFragmentName) {
   const fieldLists = [];
   const ourFields = [];
   const staticSelectionSet = visit(selectionSetUpdater, {
@@ -25,30 +68,8 @@ function makeUpdater(selectionSetUpdater, pseudoFragmentName) {
     }
   });
 
-  return originalSelectionSet => {
-    const newSelectionSet = {
-      kind: Kind.SELECTION_SET,
-      selections: staticSelectionSet.selections
-    };
-
-    fieldLists.forEach(fieldList => {
-      const node = fieldList.reduceRight((acc, field) => {
-        return {
-          kind: Kind.SELECTION_SET,
-          selections: [{
-            ...field,
-            selectionSet: acc
-          }]
-        };
-      }, originalSelectionSet);
-
-      newSelectionSet.selections = newSelectionSet.selections.concat(
-        node.selections
-      );
-    });
-
-    return newSelectionSet;
-  };
+  return originalSelectionSet =>
+    updateSelectionSet(originalSelectionSet, staticSelectionSet, fieldLists);
 }
 
 module.exports = { makeUpdater };

@@ -1,18 +1,5 @@
-const { parse } = require('graphql');
 const { WrapQuery: TransformQuery } = require('graphql-tools');
 const { makeUpdater } = require('./makeUpdater');
-
-function getUpdater(selectionSetUpdater, pseudoFragmentName) {
-  switch (typeof selectionSetUpdater) {
-    case 'function':
-      return selectionSet => selectionSetUpdater(selectionSet);
-    case 'string':
-      const document = parse(selectionSetUpdater);
-      selectionSetUpdater = document.definitions[0].selectionSet;
-    default:
-      return makeUpdater(selectionSetUpdater, pseudoFragmentName);
-  }
-}
 
 /**
  * Transform to update a selection set, useful for wrapping fields or adding additional fields.
@@ -38,7 +25,10 @@ class UpdateSelectionSet {
     pseudoFragmentName = 'Original',
     extractor = result => result
   }) {
-    this.updater = getUpdater(selectionSet, pseudoFragmentName);
+    this.updater =
+      selectionSet === 'function'
+        ? selectionSet
+        : makeUpdater(selectionSet, pseudoFragmentName);
 
     this.transformer = new TransformQuery(
       path,
