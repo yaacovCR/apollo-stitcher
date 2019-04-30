@@ -63,6 +63,8 @@ describe('stitcher', () => {
       const expectedDocument = parse(`
         query customerQuery($id: ID!) {
           customerById(id: $id) {
+            id
+            name
             planet
           }
         }
@@ -77,17 +79,17 @@ describe('stitcher', () => {
       const document = parse(`
         query customerQuery($id: ID!) {
           customerById(id: $id) {
+            id
+            name
             ...CustomerFragment
           }
         }
         fragment CustomerFragment on Customer {
-          id
-          name
           address {
             planet
           }
         }
-        `);
+      `);
 
       const fragments = document.definitions
         .filter(def => def.kind === Kind.FRAGMENT_DEFINITION)
@@ -114,12 +116,12 @@ describe('stitcher', () => {
       const expectedDocument = parse(`
         query customerQuery($id: ID!) {
           customerById(id: $id) {
+            id
+            name
             planet
           }
         }
         fragment CustomerFragment on Customer {
-          id
-          name
           address {
             planet
           }

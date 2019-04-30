@@ -1,36 +1,30 @@
 const { Kind } = require('graphql');
 const { WrapQuery: TransformQuery } = require('graphql-tools');
 
-function selectionHasFieldWithSelections(selection, fieldName) {
-  return (
-    selection.kind === Kind.FIELD &&
-    selection.name.value === fieldName &&
-    selection.selectionSet &&
-    selection.selectionSet.selections
-  );
-}
-
 function extractOneLevelOfFields(fieldNodes, fieldName, fragments) {
   let newFieldNodes = [];
 
   fieldNodes.forEach(node => {
-    if (node.kind === Kind.FIELD) {
-      if (selectionHasFieldWithSelections(node, fieldName))
-        newFieldNodes = newFieldNodes.concat(node.selectionSet.selections);
-      return;
-    }
-
-    let newNodes;
+    let possibleNodes;
     switch (node.kind) {
+      case Kind.FIELD:
+        possibleNodes = [node];
+        break;
       case Kind.INLINE_FRAGMENT:
-        newNodes = node.selectionSet.selections;
+        possibleNodes = node.selectionSet.selections;
+        break;
       case Kind.FRAGMENT_SPREAD:
-        newNodes = fragments[node.name.value].selectionSet.selections;
+        possibleNodes = fragments[node.name.value].selectionSet.selections;
+        break;
     }
 
-    if (newNodes) {
-      newNodes.forEach(node => {
-        if (selectionHasFieldWithSelections(node, fieldName))
+    if (possibleNodes) {
+      possibleNodes.forEach(node => {
+        if (
+          node.kind === Kind.FIELD &&
+          node.name.value === fieldName &&
+          node.selectionSet
+        )
           newFieldNodes = newFieldNodes.concat(node.selectionSet.selections);
       });
     }
@@ -42,13 +36,39 @@ function extractOneLevelOfFields(fieldNodes, fieldName, fragments) {
 function extractFields(selectionSet, extractionPath, fragments) {
   let newSelectionSet = {
     kind: Kind.SELECTION_SET,
-    selections: selectionSet ? selectionSet.selections : []
+    selections: []
   };
 
-  newSelectionSet.selections = extractionPath.reduce(
-    (acc, fieldName) => extractOneLevelOfFields(acc, fieldName, fragments),
-    newSelectionSet.selections
-  );
+  selectionSet.selections.forEach(node => {
+    let possibleNodes;
+    switch (node.kind) {
+      case Kind.FIELD:
+        possibleNodes = [node];
+        break;
+      case Kind.INLINE_FRAGMENT:
+        possibleNodes = node.selectionSet.selections;
+        break;
+      case Kind.FRAGMENT_SPREAD:
+        possibleNodes = fragments[node.name.value].selectionSet.selections;
+        break;
+    }
+
+    if (possibleNodes) {
+      possibleNodes.forEach(node => {
+        if (
+          node.kind === Kind.FIELD &&
+          node.name.value === extractionPath[0] &&
+          node.selectionSet
+        ) {
+          newSelectionSet.selections = newSelectionSet.selections.concat(
+            node.selectionSet.selections
+          );
+        } else {
+          newSelectionSet.selections.push(node);
+        }
+      });
+    }
+  });
 
   return newSelectionSet;
 }
