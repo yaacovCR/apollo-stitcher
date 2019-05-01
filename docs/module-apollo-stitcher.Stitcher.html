@@ -310,7 +310,7 @@
     
     <pre class="prettyprint"><code>// execute query on targetSchema directly without working from current// info object.myStitcher.execute(args, ...options)</code></pre>
 
-    <pre class="prettyprint"><code>// stitch current query to targetSchema, e.g. (a) pass the remaining// selectionSet to the target schema, (b) pass any fragment definitions// to the target schema, etc.myStitcher.stitch(info).to({args, ...options})</code></pre>
+    <pre class="prettyprint"><code>// stitch current query to targetSchema, i.e. pass the remaining// selectionSet to the target schemamyStitcher.stitch(info).to({args, ...options})</code></pre>
 
     <pre class="prettyprint"><code>// For code re-use:// 1. derive a custom Stitcher class from the base Stitcher class// 2. add a toCustomMethod that calls the "to" method with predefined options// 3. use the parent from() method to add resolver-specific optionsmyStitcher.stitch(info).from(options).toCustomMethod(args)</code></pre>
 
@@ -1658,7 +1658,7 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-apollo-stitcher.html">apollo-stitcher</a></li></ul><h3>Classes</h3><ul><li><a href="module-apollo-stitcher.ApolloClientLink.html">ApolloClientLink</a></li><li><a href="module-apollo-stitcher.ExtractFields.html">ExtractFields</a></li><li><a href="module-apollo-stitcher.Stitcher.html">Stitcher</a></li><li><a href="module-apollo-stitcher.StitchQuery.html">StitchQuery</a></li><li><a href="module-apollo-stitcher.UpdateSelectionSet.html">UpdateSelectionSet</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Motivating Example.html">Motivating Example</a></li><li><a href="tutorial-Request Specific Caching.html">Request Specific Caching</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-apollo-stitcher.html">apollo-stitcher</a></li></ul><h3>Classes</h3><ul><li><a href="module-apollo-stitcher.ApolloClientLink.html">ApolloClientLink</a></li><li><a href="module-apollo-stitcher.Stitcher.html">Stitcher</a></li><li><a href="module-apollo-stitcher.StitchQuery.html">StitchQuery</a></li><li><a href="module-apollo-stitcher.UpdateSelectionSet.html">UpdateSelectionSet</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Motivating Example.html">Motivating Example</a></li><li><a href="tutorial-Request Specific Caching.html">Request Specific Caching</a></li></ul>
 </nav>
 
 <br class="clear">

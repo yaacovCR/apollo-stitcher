@@ -10,9 +10,8 @@ const { StitchQuery } = require('./transforms/StitchQuery');
  * // info object.
  * myStitcher.execute(args, ...options)
  * @example
- * // stitch current query to targetSchema, e.g. (a) pass the remaining
- * // selectionSet to the target schema, (b) pass any fragment definitions
- * // to the target schema, etc.
+ * // stitch current query to targetSchema, i.e. pass the remaining
+ * // selectionSet to the target schema
  * myStitcher.stitch(info).to({args, ...options})
  * @example
  * // For code re-use:

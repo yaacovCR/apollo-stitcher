@@ -52,9 +52,6 @@
             <dt><a href="module-apollo-stitcher.ApolloClientLink.html">ApolloClientLink</a></dt>
             <dd></dd>
         
-            <dt><a href="module-apollo-stitcher.ExtractFields.html">ExtractFields</a></dt>
-            <dd></dd>
-        
             <dt><a href="module-apollo-stitcher.Stitcher.html">Stitcher</a></dt>
             <dd></dd>
         
@@ -279,6 +276,338 @@
 
 
         
+            
+
+    
+
+    
+    <h4 class="name" id=".makeTag"><span class="type-signature">(static) </span>makeTag<span class="signature">(pseudoFragmentName)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Function that creates a tag for use with a template literal to precompile a selection setupdater SDL string into a function with the specified pseudo-fragment name.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>pseudoFragmentName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the pseudo-fragment name to use when updating.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    a tag function that can parse a selection set SDL string template literal.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const { Stitcher, makeTag } = require('apollo-stitcher');const stitch = makeTag('PreStitch');const toInsertUserSelectionSet = stitch`{  affected_rows  returning {    ...PreStitch  }}`;class DbStitcher extends Stitcher {  toInsertUser(args) {    return this.to({      operation: 'mutation',      fieldName: 'insert_user',      args: {        objects: [args]      },      selectionSet: toInsertUserSelectionSet,      extractor: result =>        result &amp;&amp; result.affected_rows ? result.returning[0] : null    });  }}</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".makeUpdater"><span class="type-signature">(static) </span>makeUpdater<span class="signature">(selectionSetUpdater, pseudoFragmentName)</span><span class="type-signature"> &rarr; {function}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Function that precompiles a selection set updater SDL string into a function.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>selectionSetUpdater</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">an SDL string that updates a selection set using apseudo-fragment to represent the pre-stitch selection set.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>pseudoFragmentName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">the pseudo-fragment name to use when updating.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    a function that updates a selection set.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+
+        
     
 
     
@@ -294,7 +623,7 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-apollo-stitcher.html">apollo-stitcher</a></li></ul><h3>Classes</h3><ul><li><a href="module-apollo-stitcher.ApolloClientLink.html">ApolloClientLink</a></li><li><a href="module-apollo-stitcher.ExtractFields.html">ExtractFields</a></li><li><a href="module-apollo-stitcher.Stitcher.html">Stitcher</a></li><li><a href="module-apollo-stitcher.StitchQuery.html">StitchQuery</a></li><li><a href="module-apollo-stitcher.UpdateSelectionSet.html">UpdateSelectionSet</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Motivating Example.html">Motivating Example</a></li><li><a href="tutorial-Request Specific Caching.html">Request Specific Caching</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-apollo-stitcher.html">apollo-stitcher</a></li></ul><h3>Classes</h3><ul><li><a href="module-apollo-stitcher.ApolloClientLink.html">ApolloClientLink</a></li><li><a href="module-apollo-stitcher.Stitcher.html">Stitcher</a></li><li><a href="module-apollo-stitcher.StitchQuery.html">StitchQuery</a></li><li><a href="module-apollo-stitcher.UpdateSelectionSet.html">UpdateSelectionSet</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Motivating Example.html">Motivating Example</a></li><li><a href="tutorial-Request Specific Caching.html">Request Specific Caching</a></li></ul>
 </nav>
 
 <br class="clear">

@@ -33,7 +33,7 @@ function updateSelectionSet(
 
 function selectionSetToAST(selectionSet) {
   const document = parse(selectionSet);
-  return document.definitions[0].selectionSet
+  return document.definitions[0].selectionSet;
 }
 
 function makeASTUpdater(selectionSetUpdater, pseudoFragmentName) {
@@ -65,6 +65,38 @@ function makeASTUpdater(selectionSetUpdater, pseudoFragmentName) {
     updateSelectionSet(originalSelectionSet, staticSelectionSet, fieldLists);
 }
 
+/**
+ * Function that precompiles a selection set updater SDL string into a function.
+ * @memberof module:apollo-stitcher
+ * @param {string} selectionSetUpdater - an SDL string that updates a selection set using a
+ * pseudo-fragment to represent the pre-stitch selection set.
+ * @param {string} pseudoFragmentName - the pseudo-fragment name to use when updating.
+ * @returns {function} a function that updates a selection set.
+ * @example
+ * const { Stitcher, makeUpdater } = require('apollo-stitcher');
+ *
+ * const toInsertUserSelectionSet = makeUpdater(`{
+ *   affected_rows
+ *   returning {
+ *     ...PreStitch
+ *   }
+ * }`, 'PreStitch');
+ *
+ * class DbStitcher extends Stitcher {
+ *   toInsertUser(args) {
+ *     return this.to({
+ *       operation: 'mutation',
+ *       fieldName: 'insert_user',
+ *       args: {
+ *         objects: [args]
+ *       },
+ *       selectionSet: toInsertUserSelectionSet,
+ *       extractor: result =>
+ *         result && result.affected_rows ? result.returning[0] : null
+ *     });
+ *   }
+ * }
+ **/
 function makeUpdater(selectionSetUpdater, pseudoFragmentName) {
   if (typeof selectionSetUpdater === 'string')
     selectionSetUpdater = selectionSetToAST(selectionSetUpdater);
@@ -72,12 +104,45 @@ function makeUpdater(selectionSetUpdater, pseudoFragmentName) {
   return makeASTUpdater(selectionSetUpdater, pseudoFragmentName);
 }
 
+/**
+ * Function that creates a tag for use with a template literal to precompile a selection set
+ * updater SDL string into a function with the specified pseudo-fragment name.
+ * @memberof module:apollo-stitcher
+ * @param {string} pseudoFragmentName - the pseudo-fragment name to use when updating.
+ * @returns {function} a tag function that can parse a selection set SDL string template literal.
+ * @example
+ * const { Stitcher, makeTag } = require('apollo-stitcher');
+ * 
+ * const stitch = makeTag('PreStitch');
+ * 
+ * const toInsertUserSelectionSet = stitch`{
+ *   affected_rows
+ *   returning {
+ *     ...PreStitch
+ *   }
+ * }`;
+ *
+ * class DbStitcher extends Stitcher {
+ *   toInsertUser(args) {
+ *     return this.to({
+ *       operation: 'mutation',
+ *       fieldName: 'insert_user',
+ *       args: {
+ *         objects: [args]
+ *       },
+ *       selectionSet: toInsertUserSelectionSet,
+ *       extractor: result =>
+ *         result && result.affected_rows ? result.returning[0] : null
+ *     });
+ *   }
+ * }
+ **/
 function makeTag(pseudoFragmentName) {
-  return function (strings, ...expressions) {
+  return function(strings, ...expressions) {
     const sdl = String.raw(strings, ...expressions);
     const ast = selectionSetToAST(sdl);
-    return makeASTUpdater(ast, pseudoFragmentName)
-  }
+    return makeASTUpdater(ast, pseudoFragmentName);
+  };
 }
 
 module.exports = {

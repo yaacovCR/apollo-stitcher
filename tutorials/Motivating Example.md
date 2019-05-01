@@ -46,7 +46,7 @@ const user = await context.dataSources.db
   });
 ```
 
-The `selectionSet` string literal and `PreStitch` pseudo-fragment within the `to` method provides a simple abstraction for adding and wrapping fields. Field extraction within the `from` method also works if the selection set contains fragments.
+The `selectionSet` string literal and `PreStitch` pseudo-fragment within the `to` method provides a simple abstraction for adding and wrapping fields.
 
 Without apollo-stitcher, the above can be accomplished via delegateToSchema and transforms directly (included for comparison below), so why use apollo-stitcher instead of just the StitchQuery transforms that it relies on?
 
