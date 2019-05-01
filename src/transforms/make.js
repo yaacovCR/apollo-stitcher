@@ -3,15 +3,15 @@ const { Kind, visit, parse } = require('graphql');
 function updateSelectionSet(
   originalSelectionSet,
   staticSelectionSet,
-  fieldLists
+  updateInstructions
 ) {
   const newSelectionSet = {
     kind: Kind.SELECTION_SET,
     selections: staticSelectionSet.selections
   };
 
-  fieldLists.forEach(fieldList => {
-    const node = fieldList.reduceRight((acc, field) => {
+  updateInstructions.forEach(updateInstruction => {
+    const node = updateInstruction.fields.reduceRight((acc, field) => {
       return {
         kind: Kind.SELECTION_SET,
         selections: [
@@ -21,7 +21,7 @@ function updateSelectionSet(
           }
         ]
       };
-    }, originalSelectionSet);
+    }, updateInstruction.updater(originalSelectionSet));
 
     newSelectionSet.selections = newSelectionSet.selections.concat(
       node.selections
@@ -31,13 +31,17 @@ function updateSelectionSet(
   return newSelectionSet;
 }
 
+function makeUpdaterFromPseudoFragment(node) {
+  return selectionSet => selectionSet;
+}
+
 function selectionSetToAST(selectionSet) {
   const document = parse(selectionSet);
   return document.definitions[0].selectionSet;
 }
 
-function makeASTUpdater(selectionSetUpdater, pseudoFragmentName) {
-  const fieldLists = [];
+function makeUpdaterFromAST(selectionSetUpdater, pseudoFragmentName) {
+  const updateInstructions = [];
   const ourFields = [];
   const staticSelectionSet = visit(selectionSetUpdater, {
     [Kind.FIELD]: {
@@ -55,14 +59,21 @@ function makeASTUpdater(selectionSetUpdater, pseudoFragmentName) {
     },
     [Kind.FRAGMENT_SPREAD]: node => {
       if (node.name && node.name.value === pseudoFragmentName) {
-        fieldLists.push([].concat(ourFields));
+        updateInstructions.push({
+          fields: [].concat(ourFields),
+          updater: makeUpdaterFromPseudoFragment(node)
+        });
       }
       return null;
     }
   });
 
   return originalSelectionSet =>
-    updateSelectionSet(originalSelectionSet, staticSelectionSet, fieldLists);
+    updateSelectionSet(
+      originalSelectionSet,
+      staticSelectionSet,
+      updateInstructions
+    );
 }
 
 /**
@@ -101,7 +112,7 @@ function makeUpdater(selectionSetUpdater, pseudoFragmentName) {
   if (typeof selectionSetUpdater === 'string')
     selectionSetUpdater = selectionSetToAST(selectionSetUpdater);
 
-  return makeASTUpdater(selectionSetUpdater, pseudoFragmentName);
+  return makeUpdaterFromAST(selectionSetUpdater, pseudoFragmentName);
 }
 
 /**
@@ -112,9 +123,9 @@ function makeUpdater(selectionSetUpdater, pseudoFragmentName) {
  * @returns {function} a tag function that can parse a selection set SDL string template literal.
  * @example
  * const { Stitcher, makeTag } = require('apollo-stitcher');
- * 
+ *
  * const stitch = makeTag('PreStitch');
- * 
+ *
  * const addInsertFields = stitch`{
  *   affected_rows
  *   returning {
@@ -141,7 +152,7 @@ function makeTag(pseudoFragmentName) {
   return function(strings, ...expressions) {
     const sdl = String.raw(strings, ...expressions);
     const ast = selectionSetToAST(sdl);
-    return makeASTUpdater(ast, pseudoFragmentName);
+    return makeUpdaterFromAST(ast, pseudoFragmentName);
   };
 }
 
