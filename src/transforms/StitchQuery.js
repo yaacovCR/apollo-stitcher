@@ -1,4 +1,4 @@
-const { ExtractFields } = require('./ExtractFields');
+const { ExtractField } = require('graphql-tools');
 const { UpdateSelectionSet } = require('./UpdateSelectionSet');
 
 /**
@@ -24,8 +24,6 @@ class StitchQuery {
    * set.
    * @param {function} [options.toStitch.extractor] - a function to process the result from the modified
    * request.
-   * @param {object} [options.fragments] - fragment definitions, necessary to allow field extraction if
-   * fields are specified as fragments.
    * @param {string} [options.preStitchFragmentName=PreStitch] - a string representing the fragment
    * name for the pseudo-fragment representing the pre-"stitch" selection set, to be used in
    * conjunction with the selectionSet option within the "from" and "to" methods.
@@ -36,17 +34,15 @@ class StitchQuery {
     path,
     fromStitch = {},
     toStitch = {},
-    fragments = {},
     preStitchFragmentName = 'PreStitch'
   }) {
     this.transforms = [];
 
     if (fromStitch.path) {
       this.transforms.push(
-        new ExtractFields({
-          initialPath: path,
-          extractionPath: fromStitch.path,
-          fragments
+        new ExtractField({
+          from: path.concat(fromStitch.path),
+          to: path
         })
       );
     }
