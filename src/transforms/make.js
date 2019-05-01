@@ -75,7 +75,7 @@ function makeASTUpdater(selectionSetUpdater, pseudoFragmentName) {
  * @example
  * const { Stitcher, makeUpdater } = require('apollo-stitcher');
  *
- * const toInsertUserSelectionSet = makeUpdater(`{
+ * const addInsertFields = makeUpdater(`{
  *   affected_rows
  *   returning {
  *     ...PreStitch
@@ -90,7 +90,7 @@ function makeASTUpdater(selectionSetUpdater, pseudoFragmentName) {
  *       args: {
  *         objects: [args]
  *       },
- *       selectionSet: toInsertUserSelectionSet,
+ *       selectionSet: addInsertFields,
  *       extractor: result =>
  *         result && result.affected_rows ? result.returning[0] : null
  *     });
@@ -115,7 +115,7 @@ function makeUpdater(selectionSetUpdater, pseudoFragmentName) {
  * 
  * const stitch = makeTag('PreStitch');
  * 
- * const toInsertUserSelectionSet = stitch`{
+ * const addInsertFields = stitch`{
  *   affected_rows
  *   returning {
  *     ...PreStitch
@@ -130,7 +130,7 @@ function makeUpdater(selectionSetUpdater, pseudoFragmentName) {
  *       args: {
  *         objects: [args]
  *       },
- *       selectionSet: toInsertUserSelectionSet,
+ *       selectionSet: addInsertFields,
  *       extractor: result =>
  *         result && result.affected_rows ? result.returning[0] : null
  *     });
