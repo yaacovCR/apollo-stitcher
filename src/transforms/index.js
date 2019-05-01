@@ -7,5 +7,6 @@ module.exports = {
   StitchQuery,
   ExtractFields,
   UpdateSelectionSet,
-  makeUpdater
+  makeUpdater,
+  makeTag
 };

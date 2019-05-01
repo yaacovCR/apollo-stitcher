@@ -36,13 +36,6 @@ function selectionSetToAST(selectionSet) {
   return document.definitions[0].selectionSet
 }
 
-function makeUpdater(selectionSetUpdater, pseudoFragmentName) {
-  if (typeof selectionSetUpdater === 'string')
-    selectionSetUpdater = selectionSetToAST(selectionSetUpdater);
-
-  return makeASTUpdater(selectionSetUpdater, pseudoFragmentName)
-}
-
 function makeASTUpdater(selectionSetUpdater, pseudoFragmentName) {
   const fieldLists = [];
   const ourFields = [];
@@ -72,4 +65,22 @@ function makeASTUpdater(selectionSetUpdater, pseudoFragmentName) {
     updateSelectionSet(originalSelectionSet, staticSelectionSet, fieldLists);
 }
 
-module.exports = { makeUpdater };
+function makeUpdater(selectionSetUpdater, pseudoFragmentName) {
+  if (typeof selectionSetUpdater === 'string')
+    selectionSetUpdater = selectionSetToAST(selectionSetUpdater);
+
+  return makeASTUpdater(selectionSetUpdater, pseudoFragmentName);
+}
+
+function makeTag(pseudoFragmentName) {
+  return function (strings, ...expressions) {
+    const sdl = String.raw(strings, ...expressions);
+    const ast = selectionSetToAST(sdl);
+    return makeASTUpdater(ast, pseudoFragmentName)
+  }
+}
+
+module.exports = {
+  makeUpdater,
+  makeTag
+};

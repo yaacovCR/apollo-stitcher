@@ -1,5 +1,5 @@
 const { WrapQuery: TransformQuery } = require('graphql-tools');
-const { makeUpdater } = require('./makeUpdater');
+const { makeUpdater } = require('./make');
 
 /**
  * Transform to update a selection set, useful for wrapping fields or adding additional fields.
@@ -26,7 +26,7 @@ class UpdateSelectionSet {
     extractor = result => result
   }) {
     this.updater =
-      selectionSet === 'function'
+      typeof selectionSet === 'function'
         ? selectionSet
         : makeUpdater(selectionSet, pseudoFragmentName);
 
