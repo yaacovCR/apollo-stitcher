@@ -1,7 +1,7 @@
 const { expect } = require('chai');
 const { parse, print } = require('graphql');
 const { UpdateSelectionSet } = require('../src/transforms/UpdateSelectionSet');
-const { makeUpdater, makeTag } = require('../src/transforms/make');
+const { makeUpdater, makeTag } = require('../src');
 
 describe('stitcher', () => {
   describe('makeUpdater', () => {

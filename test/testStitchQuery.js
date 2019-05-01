@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const { parse, print } = require('graphql');
-const { StitchQuery } = require('../src/transforms/StitchQuery');
+const { StitchQuery } = require('../src');
 
 describe('stitcher', () => {
   describe('StitchQuery Transform', () => {

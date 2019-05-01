@@ -1,12 +1,9 @@
 const { StitchQuery } = require('./StitchQuery');
-const { ExtractFields } = require('./ExtractFields');
 const { UpdateSelectionSet } = require('./UpdateSelectionSet');
-const { makeUpdater } = require('./makeUpdater');
+const make = require('./make');
 
 module.exports = {
   StitchQuery,
-  ExtractFields,
   UpdateSelectionSet,
-  makeUpdater,
-  makeTag
+  ...make
 };

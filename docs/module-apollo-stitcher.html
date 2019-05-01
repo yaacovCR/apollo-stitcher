@@ -606,6 +606,11 @@
 
 
 
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const { Stitcher, makeUpdater } = require('apollo-stitcher');const toInsertUserSelectionSet = makeUpdater(`{  affected_rows  returning {    ...PreStitch  }}`, 'PreStitch');class DbStitcher extends Stitcher {  toInsertUser(args) {    return this.to({      operation: 'mutation',      fieldName: 'insert_user',      args: {        objects: [args]      },      selectionSet: toInsertUserSelectionSet,      extractor: result =>        result &amp;&amp; result.affected_rows ? result.returning[0] : null    });  }}</code></pre>
+
+
 
         
     

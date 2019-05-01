@@ -9,7 +9,7 @@ const {
   subscriptionSchema,
   delegatingSubscriptionSchema
 } = require('./testingSchemas');
-const { Stitcher } = require('../src/Stitcher');
+const { Stitcher } = require('../src');
 
 describe('stitcher', () => {
   describe('base Stitcher class', () => {
