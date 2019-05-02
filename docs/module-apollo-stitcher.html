@@ -428,7 +428,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>const { Stitcher, makeTag } = require('apollo-stitcher');const stitch = makeTag('PreStitch');const addInsertFields = stitch`{  affected_rows  returning {    ...PreStitch  }}`;class DbStitcher extends Stitcher {  toInsertUser(args) {    return this.to({      operation: 'mutation',      fieldName: 'insert_user',      args: {        objects: [args]      },      selectionSet: addInsertFields,      extractor: result =>        result &amp;&amp; result.affected_rows ? result.returning[0] : null    });  }}</code></pre>
+    <pre class="prettyprint"><code>const { Stitcher, makeTag } = require('apollo-stitcher');const myTag = makeTag('MyPseudoFragmentName');const addInsertFields = myTag`{  affected_rows  returning {    ...MyPseudoFragmentName  }}`;class DbStitcher extends Stitcher {  toInsertUser(args) {    return this.to({      operation: 'mutation',      fieldName: 'insert_user',      args: {        objects: [args]      },      selectionSet: addInsertFields,      extractor: result =>        result &amp;&amp; result.affected_rows ? result.returning[0] : null    });  }}</code></pre>
 
 
 
@@ -608,7 +608,115 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>const { Stitcher, makeUpdater } = require('apollo-stitcher');const addInsertFields = makeUpdater(`{  affected_rows  returning {    ...PreStitch  }}`, 'PreStitch');class DbStitcher extends Stitcher {  toInsertUser(args) {    return this.to({      operation: 'mutation',      fieldName: 'insert_user',      args: {        objects: [args]      },      selectionSet: addInsertFields,      extractor: result =>        result &amp;&amp; result.affected_rows ? result.returning[0] : null    });  }}</code></pre>
+    <pre class="prettyprint"><code>const { Stitcher, makeUpdater } = require('apollo-stitcher');const addInsertFields = makeUpdater(`{  affected_rows  returning {    ...MyPseudoFragmentName  }}`, 'MyPseudoFragmentName');class DbStitcher extends Stitcher {  toInsertUser(args) {    return this.to({      operation: 'mutation',      fieldName: 'insert_user',      args: {        objects: [args]      },      selectionSet: addInsertFields,      extractor: result =>        result &amp;&amp; result.affected_rows ? result.returning[0] : null    });  }}</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".stitch"><span class="type-signature">(static) </span>stitch<span class="signature">()</span><span class="type-signature"> &rarr; {function}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Function that creates a tag for use with a template literal to precompile a selection setupdater SDL string into a function with the default pseudo-fragment name 'PreStitch'.
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    a tag function that can parse a selection set SDL string template literal.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">function</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const { Stitcher, stitch } = require('apollo-stitcher');const addInsertFields = stitch`{  affected_rows  returning {    ...PreStitch  }}`;class DbStitcher extends Stitcher {  toInsertUser(args) {    return this.to({      operation: 'mutation',      fieldName: 'insert_user',      args: {        objects: [args]      },      selectionSet: addInsertFields,      extractor: result =>        result &amp;&amp; result.affected_rows ? result.returning[0] : null    });  }}</code></pre>
 
 
 
