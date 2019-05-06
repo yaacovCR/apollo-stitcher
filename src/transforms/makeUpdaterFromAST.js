@@ -1,4 +1,4 @@
-const { Kind, visit } = require('graphql');
+const { Kind, visit, valueFromASTUntyped } = require('graphql');
 const { validatePseudoFragment } = require('./validatePseudoFragment');
 const { extractFields } = require('./extractFields');
 
@@ -47,11 +47,8 @@ function getOptions(pseudoFragment) {
         directiveName = null;
       }
     },
-    //parse one level of list values
     [Kind.ARGUMENT]: node => {
-      options[directiveName][node.name.value] = node.value.values
-        ? node.value.values.map(value => value.value)
-        : node.value.value;
+      options[directiveName][node.name.value] = valueFromASTUntyped(node.value)
     }
   });
 
