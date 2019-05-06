@@ -1,79 +1,9 @@
-const { Kind, visit, parse } = require('graphql');
-
-function updateSelectionSet(
-  originalSelectionSet,
-  staticSelectionSet,
-  updateInstructions
-) {
-  const newSelectionSet = {
-    kind: Kind.SELECTION_SET,
-    selections: staticSelectionSet.selections
-  };
-
-  updateInstructions.forEach(updateInstruction => {
-    const node = updateInstruction.fields.reduceRight((acc, field) => {
-      return {
-        kind: Kind.SELECTION_SET,
-        selections: [
-          {
-            ...field,
-            selectionSet: acc
-          }
-        ]
-      };
-    }, updateInstruction.updater(originalSelectionSet));
-
-    newSelectionSet.selections = newSelectionSet.selections.concat(
-      node.selections
-    );
-  });
-
-  return newSelectionSet;
-}
-
-function makeUpdaterFromPseudoFragment(node) {
-  return selectionSet => selectionSet;
-}
+const { parse } = require('graphql');
+const { makeUpdaterFromAST } = require('./makeUpdaterFromAST');
 
 function selectionSetToAST(selectionSet) {
   const document = parse(selectionSet);
   return document.definitions[0].selectionSet;
-}
-
-function makeUpdaterFromAST(selectionSetUpdater, pseudoFragmentName) {
-  const updateInstructions = [];
-  const ourFields = [];
-  const staticSelectionSet = visit(selectionSetUpdater, {
-    [Kind.FIELD]: {
-      enter: node => {
-        ourFields.push({
-          ...node,
-          selectionSet: undefined
-        });
-      },
-      leave: node => {
-        ourFields.pop();
-        if (node.selectionSet && !node.selectionSet.selections.length)
-          return null;
-      }
-    },
-    [Kind.FRAGMENT_SPREAD]: node => {
-      if (node.name && node.name.value === pseudoFragmentName) {
-        updateInstructions.push({
-          fields: [].concat(ourFields),
-          updater: makeUpdaterFromPseudoFragment(node)
-        });
-      }
-      return null;
-    }
-  });
-
-  return originalSelectionSet =>
-    updateSelectionSet(
-      originalSelectionSet,
-      staticSelectionSet,
-      updateInstructions
-    );
 }
 
 /**
