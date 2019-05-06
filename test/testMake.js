@@ -240,9 +240,21 @@ describe('stitcher', () => {
             name
             address {
               outer {
-                inner
+                inner1
+              }
+              outer {
+                inner2
               }
             }
+            address {
+              outer {
+                inner3
+              }
+              outer {
+                inner4
+              }
+            }
+            telephone
           }
         }
       `);
@@ -266,7 +278,10 @@ describe('stitcher', () => {
       const expectedDocument = parse(`
         query customerQuery($id: ID!) {
           customerById(id: $id) {
-            inner
+            inner1
+            inner2
+            inner3
+            inner4
           }
         }
       `);
