@@ -290,5 +290,65 @@ describe('stitcher', () => {
         print(expectedDocument)
       );
     });
+
+    it('should work when using stitching directives and fragments', () => {
+      const document = parse(`
+        query customerQuery($id: ID!) {
+          customerById(id: $id) {
+            ...OuterFragment
+          }
+        }
+      `);
+
+      const fragmentDocument = parse(`
+        fragment OuterFragment on Customer {
+          outer {
+            inner1
+          }
+          ...InnerFragment
+        }
+        fragment InnerFragment on Customer {
+          outer {
+            inner2
+          }
+        }
+      `);
+
+      fragments = {};
+
+      fragmentDocument.definitions.forEach(def => {
+        fragments[def.name.value] = def;
+      });
+
+      const options = {
+        path: ['customerById'],
+        selectionSet: stitch`{
+          ...PreStitch @from(path: ["outer"])
+        }`,
+        fragments
+      };
+
+      const transform = new UpdateSelectionSet(options);
+
+      const transformedOperation = transform.transformRequest({
+        document,
+        variables: {
+          id: 'c1'
+        }
+      });
+
+      const expectedDocument = parse(`
+        query customerQuery($id: ID!) {
+          customerById(id: $id) {
+            inner1
+            inner2
+          }
+        }
+      `);
+
+      expect(print(transformedOperation.document)).to.equal(
+        print(expectedDocument)
+      );
+    });
   });
 });

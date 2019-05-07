@@ -1,16 +1,54 @@
 const { visit, Kind } = require('graphql');
 
-// Compare https://github.com/apollographql/graphql-tools/blob/master/src/transforms/ExtractField.ts
-// Below code:
-// 1. FIXED: Collects all matching fields instead of just the first field.
-// 2. FIXME: Still Ddoes not work with named fragments along the extraction path.
-function extractFields(selectionSet, path) {
+function collectFields(
+  selectionSet,
+  fragments,
+  fields = [],
+  visitedFragmentNames = {}
+) {
+  selectionSet.selections.forEach(selection => {
+    switch (selection.kind) {
+      case Kind.FIELD:
+        fields.push(selection);
+        break;
+      case Kind.INLINE_FRAGMENT:
+        collectFields(
+          selection.selectionSet,
+          fragments,
+          fields,
+          visitedFragmentNames
+        );
+        break;
+      case Kind.FRAGMENT_SPREAD:
+        const fragmentName = selection.name.value;
+        if (!visitedFragmentNames[fragmentName]) {
+          collectFields(
+            fragments[fragmentName].selectionSet,
+            fragments,
+            fields,
+            visitedFragmentNames
+          );
+        }
+        break;
+    }
+  });
+
+  return {
+    kind: Kind.SELECTION_SET,
+    selections: fields
+  };
+}
+
+function extractFields(selectionSet, path, fragments) {
   let newSelections = [];
 
   let index = 0;
   const lastIndex = path.length - 1;
 
   visit(selectionSet, {
+    [Kind.SELECTION_SET]: {
+      enter: node => collectFields(node, fragments)
+    },
     [Kind.FIELD]: {
       enter: node => {
         if (node.name.value !== path[index]) {

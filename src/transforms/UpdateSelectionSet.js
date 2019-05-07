@@ -13,6 +13,8 @@ class UpdateSelectionSet {
    * graphql SDL or as an AST, in which references to a pseudo-fragment named Original will be
    * expanded with the original selection set. Alternatively, selectionSet may represent a function
    * that takes the original selection set AST as an argument and returns a new selection set.
+   * @param {object} [options.fragments] - a map of named fragment definitions that can be
+   * be referenced within the selection set.
    * @param {string} [options.pseudoFragmentName=Original] - a string representing the fragment
    * name for the pseudo-fragment representing the original selection set.
    * @param {function} [options.extractor] - a function to process the result from the modified request.
@@ -22,6 +24,7 @@ class UpdateSelectionSet {
   constructor({
     path,
     selectionSet,
+    fragments = {},
     pseudoFragmentName = 'Original',
     extractor = result => result
   }) {
@@ -32,7 +35,7 @@ class UpdateSelectionSet {
 
     this.transformer = new TransformQuery(
       path,
-      selectionSet => this.updater(selectionSet),
+      selectionSet => this.updater(selectionSet, fragments),
       extractor
     );
   }

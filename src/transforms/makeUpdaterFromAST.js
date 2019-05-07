@@ -4,6 +4,7 @@ const { extractFields } = require('./extractFields');
 
 function updateSelectionSet(
   originalSelectionSet,
+  fragments,
   staticSelectionSet,
   updateInstructions
 ) {
@@ -23,7 +24,7 @@ function updateSelectionSet(
           }
         ]
       };
-    }, updateInstruction.updater(originalSelectionSet));
+    }, updateInstruction.updater(originalSelectionSet, fragments));
 
     newSelectionSet.selections = newSelectionSet.selections.concat(
       node.selections
@@ -60,9 +61,9 @@ function makeUpdaterFromPseudoFragment(pseudoFragment) {
 
   const options = getOptions(pseudoFragment);
 
-  return selectionSet => {
+  return (selectionSet, fragments) => {
     if (options.from) {
-      selectionSet = extractFields(selectionSet, options.from.path);
+      selectionSet = extractFields(selectionSet, options.from.path, fragments);
     }
     return selectionSet;
   };
@@ -96,9 +97,10 @@ function makeUpdaterFromAST(selectionSetUpdater, pseudoFragmentName) {
     }
   });
 
-  return originalSelectionSet =>
+  return (originalSelectionSet, fragments) =>
     updateSelectionSet(
       originalSelectionSet,
+      fragments,
       staticSelectionSet,
       updateInstructions
     );
