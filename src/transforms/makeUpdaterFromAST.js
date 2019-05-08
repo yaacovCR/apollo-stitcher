@@ -49,7 +49,7 @@ function getOptions(pseudoFragment) {
       }
     },
     [Kind.ARGUMENT]: node => {
-      options[directiveName][node.name.value] = valueFromASTUntyped(node.value)
+      options[directiveName][node.name.value] = valueFromASTUntyped(node.value);
     }
   });
 

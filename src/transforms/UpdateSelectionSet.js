@@ -1,4 +1,4 @@
-const { WrapQuery: TransformQuery } = require('graphql-tools');
+const { TransformQuery } = require('./TransformQuery');
 const { makeUpdater } = require('./make');
 
 /**
@@ -33,11 +33,12 @@ class UpdateSelectionSet {
         ? selectionSet
         : makeUpdater(selectionSet, pseudoFragmentName);
 
-    this.transformer = new TransformQuery(
+    this.transformer = new TransformQuery({
       path,
-      selectionSet => this.updater(selectionSet, fragments),
-      extractor
-    );
+      queryTransformer: this.updater,
+      resultTransformer: extractor,
+      fragments
+    });
   }
 
   transformRequest(request) {

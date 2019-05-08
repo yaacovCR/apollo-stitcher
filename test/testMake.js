@@ -1,6 +1,6 @@
 const { expect } = require('chai');
 const { parse, print } = require('graphql');
-const { UpdateSelectionSet } = require('../src/transforms/UpdateSelectionSet');
+const { TransformQuery } = require('../src/transforms/TransformQuery');
 const { makeUpdater, makeTag, stitch } = require('../src');
 
 describe('stitcher', () => {
@@ -20,7 +20,7 @@ describe('stitcher', () => {
 
       const options = {
         path: ['customerById', 'address'],
-        selectionSet: makeUpdater(
+        queryTransformer: makeUpdater(
           `
           {
             outerAddressWrapper {
@@ -37,7 +37,7 @@ describe('stitcher', () => {
         )
       };
 
-      const transform = new UpdateSelectionSet(options);
+      const transform = new TransformQuery(options);
 
       const transformedOperation = transform.transformRequest({
         document,
@@ -95,7 +95,7 @@ describe('stitcher', () => {
 
       const options = {
         path: ['customerById', 'address'],
-        selectionSet: tag`{
+        queryTransformer: tag`{
           outerAddressWrapper {
             outerAdditionalField
             innerAddressWrapper {
@@ -107,7 +107,7 @@ describe('stitcher', () => {
         }`
       };
 
-      const transform = new UpdateSelectionSet(options);
+      const transform = new TransformQuery(options);
 
       const transformedOperation = transform.transformRequest({
         document,
@@ -163,7 +163,7 @@ describe('stitcher', () => {
 
       const options = {
         path: ['customerById', 'address'],
-        selectionSet: stitch`{
+        queryTransformer: stitch`{
           outerAddressWrapper {
             outerAdditionalField
             innerAddressWrapper {
@@ -175,7 +175,7 @@ describe('stitcher', () => {
         }`
       };
 
-      const transform = new UpdateSelectionSet(options);
+      const transform = new TransformQuery(options);
 
       const transformedOperation = transform.transformRequest({
         document,
@@ -261,12 +261,12 @@ describe('stitcher', () => {
 
       const options = {
         path: ['customerById'],
-        selectionSet: stitch`{
+        queryTransformer: stitch`{
           ...PreStitch @from(path: ["address", "outer"])
         }`
       };
 
-      const transform = new UpdateSelectionSet(options);
+      const transform = new TransformQuery(options);
 
       const transformedOperation = transform.transformRequest({
         document,
@@ -322,13 +322,13 @@ describe('stitcher', () => {
 
       const options = {
         path: ['customerById'],
-        selectionSet: stitch`{
+        queryTransformer: stitch`{
           ...PreStitch @from(path: ["outer"])
         }`,
         fragments
       };
 
-      const transform = new UpdateSelectionSet(options);
+      const transform = new TransformQuery(options);
 
       const transformedOperation = transform.transformRequest({
         document,
