@@ -50,7 +50,42 @@
 <li>Provides simple method for per-request caching using Apollo Client.</li>
 </ul>
 <h3>Installation</h3><p><code>npm install graphql apollo-stitcher</code></p>
-<h3>API and Tutorials</h3><p>See <a href="https://yaacovcr.github.io/apollo-stitcher">yaacovcr.github.io/apollo-stitcher</a>.</p></article>
+<h3>Getting Started</h3><p>Extend the Stitcher class and define methods specific to your data model...</p>
+<pre class="prettyprint source lang-javascript"><code>const { Stitcher, stitch } = require('apollo-stitcher');
+
+const wrapInsert = stitch`{
+  affected_rows
+  returning {
+    ...PreStitch
+  }
+}`;
+
+const unwrapInsert = result =>
+  result && result.affected_rows ? result.returning[0] : null
+
+class DbStitcher extends Stitcher {
+  delegateToInsertUser(args) {
+    return this.transform({
+      selectionSet: wrapInsert,
+      result: unwrapInsert
+    }).delegateTo({
+      operation: 'mutation',
+      fieldName: 'insert_user',
+      args: {
+        objects: [args]
+      }
+    });
+  }
+}</code></pre><p>...and just add the datasource to your server.</p>
+<pre class="prettyprint source lang-javascript"><code>const dataSources = () => {
+  return {
+    db: new DbStitcher({ dbSchema })
+  };
+};</code></pre><p>Now you can just do this in your resolver:</p>
+<pre class="prettyprint source lang-javascript"><code>const user = await context.dataSources.db.delegateToInsertUser({
+    email: lowerCaseEmail,
+    password: hashedPassword
+  });</code></pre><h3>API and Tutorials</h3><p>See <a href="https://yaacovcr.github.io/apollo-stitcher">yaacovcr.github.io/apollo-stitcher</a>.</p></article>
     </section>
 
 
@@ -61,7 +96,7 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-apollo-stitcher.html">apollo-stitcher</a></li></ul><h3>Classes</h3><ul><li><a href="module-apollo-stitcher.ApolloClientLink.html">ApolloClientLink</a></li><li><a href="module-apollo-stitcher.Stitcher.html">Stitcher</a></li><li><a href="module-apollo-stitcher.StitchQuery.html">StitchQuery</a></li><li><a href="module-apollo-stitcher.TransformQuery.html">TransformQuery</a></li><li><a href="module-apollo-stitcher.UpdateSelectionSet.html">UpdateSelectionSet</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Motivating Example.html">Motivating Example</a></li><li><a href="tutorial-Precompiling SelectionSet Updaters.html">Precompiling SelectionSet Updaters</a></li><li><a href="tutorial-Request Specific Caching.html">Request Specific Caching</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-apollo-stitcher.html">apollo-stitcher</a></li></ul><h3>Classes</h3><ul><li><a href="module-apollo-stitcher.ApolloClientLink.html">ApolloClientLink</a></li><li><a href="module-apollo-stitcher.Stitcher.html">Stitcher</a></li><li><a href="module-apollo-stitcher.TransformQuery.html">TransformQuery</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Motivating Example.html">Motivating Example</a></li><li><a href="tutorial-Request Specific Caching.html">Request Specific Caching</a></li></ul>
 </nav>
 
 <br class="clear">

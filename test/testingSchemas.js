@@ -73,7 +73,7 @@ const mergedSchema = mergeSchemas({
       chirps: {
         fragment: `... on User { id }`,
         resolve(user, args, context, info) {
-          return context.chirpStitcher.stitch({ info, context }).to({
+          return context.chirpStitcher.from({ info, context }).delegateTo({
             operation: 'query',
             fieldName: 'chirpsByAuthorId',
             args: {
@@ -87,24 +87,24 @@ const mergedSchema = mergeSchemas({
         resolve(user, args, context, info) {
           return {
             address: context.authorStitcher
-              .stitch({ info, context })
-              .from({
-                path: ['address']
+              .from({ info, context })
+              .transform({
+                selectionSet: `{
+                  demographics {
+                    address {
+                      ...PreStitch @extract(path: ["address"])
+                    }
+                  }
+                }`,
+                result: result =>
+                  result && result.demographics && result.demographics.address
               })
-              .to({
+              .delegateTo({
                 operation: 'query',
                 fieldName: 'userById',
                 args: {
                   id: user.id
-                },
-                selectionSet: `{
-                  demographics {
-                    address {
-                      ...PreStitch
-                    }
-                  }
-                }`,
-                extractor: result => result && result.demographics && result.demographics.address
+                }
               })
           };
         }
@@ -114,7 +114,7 @@ const mergedSchema = mergeSchemas({
       author: {
         fragment: `... on Chirp { authorId }`,
         resolve(chirp, args, context, info) {
-          return context.authorStitcher.stitch({ info, context }).to({
+          return context.authorStitcher.from({ info, context }).delegateTo({
             operation: 'query',
             fieldName: 'userById',
             args: {
@@ -168,10 +168,12 @@ const delegatingSubscriptionSchema = makeExecutableSchema({
     Subscription: {
       notifications: {
         subscribe: (user, arg, context, info) => {
-          return context.subscriptionStitcher.stitch({ info, context }).to({
-            operation: 'subscription',
-            fieldName: 'notifications'
-          });
+          return context.subscriptionStitcher
+            .from({ info, context })
+            .delegateTo({
+              operation: 'subscription',
+              fieldName: 'notifications'
+            });
         }
       }
     }

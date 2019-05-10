@@ -55,13 +55,7 @@
             <dt><a href="module-apollo-stitcher.Stitcher.html">Stitcher</a></dt>
             <dd></dd>
         
-            <dt><a href="module-apollo-stitcher.StitchQuery.html">StitchQuery</a></dt>
-            <dd></dd>
-        
             <dt><a href="module-apollo-stitcher.TransformQuery.html">TransformQuery</a></dt>
-            <dd></dd>
-        
-            <dt><a href="module-apollo-stitcher.UpdateSelectionSet.html">UpdateSelectionSet</a></dt>
             <dd></dd>
         </dl>
     
@@ -431,7 +425,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>const { Stitcher, makeTag } = require('apollo-stitcher');const myTag = makeTag('MyPseudoFragmentName');const addInsertFields = myTag`{  affected_rows  returning {    ...MyPseudoFragmentName  }}`;class DbStitcher extends Stitcher {  toInsertUser(args) {    return this.to({      operation: 'mutation',      fieldName: 'insert_user',      args: {        objects: [args]      },      selectionSet: addInsertFields,      extractor: result =>        result &amp;&amp; result.affected_rows ? result.returning[0] : null    });  }}</code></pre>
+    <pre class="prettyprint"><code>const addInsertFields = myTag`{  affected_rows  returning {    ...MyPseudoFragmentName  }}`;</code></pre>
 
 
 
@@ -611,7 +605,164 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>const { Stitcher, makeUpdater } = require('apollo-stitcher');const addInsertFields = makeUpdater(`{  affected_rows  returning {    ...MyPseudoFragmentName  }}`, 'MyPseudoFragmentName');class DbStitcher extends Stitcher {  toInsertUser(args) {    return this.to({      operation: 'mutation',      fieldName: 'insert_user',      args: {        objects: [args]      },      selectionSet: addInsertFields,      extractor: result =>        result &amp;&amp; result.affected_rows ? result.returning[0] : null    });  }}</code></pre>
+    <pre class="prettyprint"><code>const addInsertFields = makeUpdater(`{  affected_rows  returning {    ...MyPseudoFragmentName  }}`, 'MyPseudoFragmentName');</code></pre>
+
+
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id=".selectionSetToAST"><span class="type-signature">(static) </span>selectionSetToAST<span class="signature">(selectionSet)</span><span class="type-signature"> &rarr; {object}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Function that converts a selection set updater SDL string into a parsed AST.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>selectionSet</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">an SDL string.</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    a parsed AST.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">object</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>const ast = selectionSetToAST(`{  affected_rows  returning {    ...MyPseudoFragmentName  }}`);</code></pre>
 
 
 
@@ -719,7 +870,7 @@
 
     <h5>Example</h5>
     
-    <pre class="prettyprint"><code>const { Stitcher, stitch } = require('apollo-stitcher');const addInsertFields = stitch`{  affected_rows  returning {    ...PreStitch  }}`;class DbStitcher extends Stitcher {  toInsertUser(args) {    return this.to({      operation: 'mutation',      fieldName: 'insert_user',      args: {        objects: [args]      },      selectionSet: addInsertFields,      extractor: result =>        result &amp;&amp; result.affected_rows ? result.returning[0] : null    });  }}</code></pre>
+    <pre class="prettyprint"><code>const addInsertFields = stitch`{  affected_rows  returning {    ...PreStitch  }}`;</code></pre>
 
 
 
@@ -739,7 +890,7 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-apollo-stitcher.html">apollo-stitcher</a></li></ul><h3>Classes</h3><ul><li><a href="module-apollo-stitcher.ApolloClientLink.html">ApolloClientLink</a></li><li><a href="module-apollo-stitcher.Stitcher.html">Stitcher</a></li><li><a href="module-apollo-stitcher.StitchQuery.html">StitchQuery</a></li><li><a href="module-apollo-stitcher.TransformQuery.html">TransformQuery</a></li><li><a href="module-apollo-stitcher.UpdateSelectionSet.html">UpdateSelectionSet</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Motivating Example.html">Motivating Example</a></li><li><a href="tutorial-Precompiling SelectionSet Updaters.html">Precompiling SelectionSet Updaters</a></li><li><a href="tutorial-Request Specific Caching.html">Request Specific Caching</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-apollo-stitcher.html">apollo-stitcher</a></li></ul><h3>Classes</h3><ul><li><a href="module-apollo-stitcher.ApolloClientLink.html">ApolloClientLink</a></li><li><a href="module-apollo-stitcher.Stitcher.html">Stitcher</a></li><li><a href="module-apollo-stitcher.TransformQuery.html">TransformQuery</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Motivating Example.html">Motivating Example</a></li><li><a href="tutorial-Request Specific Caching.html">Request Specific Caching</a></li></ul>
 </nav>
 
 <br class="clear">

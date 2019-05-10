@@ -1,6 +1,7 @@
 const { DataSource } = require('apollo-datasource');
 const { delegateToSchema } = require('graphql-tools');
-const { StitchQuery } = require('./transforms/StitchQuery');
+const { makeUpdater, selectionSetToAST } = require('./updaters');
+const { TransformQuery } = require('./transforms/TransformQuery');
 
 /**
  * Class encapsulating interactions with a graphql data source.
@@ -8,17 +9,19 @@ const { StitchQuery } = require('./transforms/StitchQuery');
  * @example
  * // execute query on targetSchema directly without working from current
  * // info object.
- * myStitcher.execute(args, ...options)
+ * myStitcher.execute({operation, fieldName, selectionSet, args})
  * @example
  * // stitch current query to targetSchema, i.e. pass the remaining
  * // selectionSet to the target schema
- * myStitcher.stitch(info).to({args, ...options})
+ * myStitcher.from(info).delegateTo({operation, fieldName, args})
+ * @example
+ * // stitch current query to targetSchema, transform prior to delegation
+ * myStitcher.from(info).transform({selectionSet, result}).delegateTo({operation, fieldName, args})
  * @example
  * // For code re-use:
  * // 1. derive a custom Stitcher class from the base Stitcher class
- * // 2. add a toCustomMethod that calls the "to" method with predefined options
- * // 3. use the parent from() method to add resolver-specific options
- * myStitcher.stitch(info).from(options).toCustomMethod(args)
+ * // 2. add a custom delegator with any required transforms
+ * myStitcher.from(info).delegateToFieldWithTransforms(args)
  */
 class Stitcher extends DataSource {
   /**
@@ -48,75 +51,87 @@ class Stitcher extends DataSource {
     };
 
     this.preStitchFragmentName = preStitchFragmentName;
-    this.fromStitch = {};
+    this.queryTransformers = [];
+    this.resultTransformers = [];
   }
 
   initialize(config) {
     this.stitchOptions.context = config.context;
   }
 
-  /** Adds additional options to the stitch in progress, designed for adding resolver-specific
-   * stitching options to the stitch in progress. In particular, users may extend the Stitcher class
-   * and add methods that call the "to" method with pre-defined options, particular to their use cases.
-   * Resolver-specific options may then be passed to the custom "to" method using this "from" method.
-   * @param {object} options - options for schema delegation from a specific resolver.
-   * @param {object} [options.path] - root field name on target schema.
-   * @param {string|object|function} [options.selectionSet] - a selection set specified as graphql SDL
+  /** Transform the selection set prior to delegation. Options can be specified to transform the
+   * requested selection set prior to delegation and/or to reverse the transformation on receipt of
+   * the result. Multiple transformations can be performed; selection set transformations are applied
+   * sequentially, while result tranformation reversals are processed in reverse order.
+   * @param {object} options - options for selectionSet transformation.
+   * @param {string|object|function} options.selectionSet - a selection set specified as graphql SDL
    * or as an AST, in which references to a pseudo-fragment named PreStitch will be expanded with the
    * pre-"stitch" selection set. Alternatively, selectionSet may represent a function that takes the
-   * pre-"stitch" selection set AST as an argument and returns a post-"stitch" selection set.
+   * pre-"stitch" selection set AST as an argument and returns a post-"stitch" selection set. For
+   * example, a selection set can be specified to wrap fields prior to delegation, or to add fields.
+   * @param {function} [options.result] - an optional function to reverse the transformation. For
+   * example, if the selection set transformation involves wrapping the selection set prior to
+   * delegation, this option can be used to automatically unwrap the result.
    * @returns {Stitcher} a Stitcher object instance for chaining.
    * @example
-   * myStitcher.stitch(info).from(options).toCustomMethod(args)
-   * */
-  from(options) {
-    this.fromStitch = options;
+   * myStitcher.from(info).transform({selectionSet, result}).delegateTo({operation, fieldName, args})
+   * * */
+  transform({ selectionSet, result }) {
+    selectionSet =
+      typeof selectionSet === 'function'
+        ? selectionSet
+        : makeUpdater(selectionSet, this.preStitchFragmentName);
+
+    this.queryTransformers.push(selectionSet);
+    if (result) {
+      this.resultTransformers.push(result);
+    }
+
     return this;
   }
 
-  /** Stitches to the configured target schema.
+  /** Delegates to the configured target schema.
    * @param {object} options - options for schema delegation to the specified target field.
    * @param {string} options.operation - one of 'query', 'mutation', or 'subscription'.
    * @param {string} options.fieldName - root field name on target schema.
    * @param {object} [options.args] named arguments for the query.
-   * @param {string|object|function} [options.selectionSet] - a selection set specified as graphql SDL
-   * or as an AST, in which references to a pseudo-fragment named PreStitch will be expanded with the
-   * pre-"stitch" selection set. Alternatively, selectionSet may represent a function that takes the
-   * pre-"stitch" selection set AST as an argument and returns a post-"stitch" selection set.
-   * @param {function} [options.extractor] - a function that takes the result as a parameter and
-   * returns the desired result, for use in combination with selectionSet to wrap queries prior to
-   * stitching and unwrap the result.
    * @param {object[]} [options.transforms] - additional transforms to be added for this "stitch."
    * @returns {Promise} a promise that will resolve to the graphql result.
    */
-  to({ operation, fieldName, args, selectionSet, extractor, transforms }) {
-    this.stitchOptions.operation = operation;
-    this.stitchOptions.fieldName = fieldName;
-    this.stitchOptions.args = args;
+  delegateTo({ operation, fieldName, args, transforms }) {
+    const options = this.stitchOptions;
+    options.operation = operation;
+    options.fieldName = fieldName;
+    options.args = args;
 
-    this.stitchOptions.transforms = [
-      new StitchQuery({
-        path: [this.stitchOptions.fieldName],
-        fromStitch: this.fromStitch,
-        toStitch: { selectionSet, extractor },
-        fragments: this.stitchOptions.info.fragments,
-        preStitchFragmentName: this.preStitchFragmentName
-      }),
-      ...this.stitchOptions.transforms
-    ];
+    options.transforms = [];
 
-    if (transforms) {
-      this.stitchOptions.transforms = [
-        ...this.stitchOptions.transforms,
-        ...transforms
-      ];
+    const { queryTransformers, resultTransformers } = this;
+    if (queryTransformers.length) {
+      const composedQueryTransformer = queryTransformers.reduce(
+        (acc, queryTransformer) => (selectionSet, fragments) =>
+          queryTransformer(acc(selectionSet, fragments), fragments)
+      );
+
+      const composedResultTransformer = resultTransformers.length
+        ? resultTransformers.reduce((acc, resultTransformer) => result =>
+            acc(resultTransformer(result))
+          )
+        : result => result;
+
+      options.transforms.push(
+        new TransformQuery({
+          path: [options.fieldName],
+          queryTransformer: composedQueryTransformer,
+          resultTransformer: composedResultTransformer,
+          fragments: options.info.fragments
+        })
+      );
     }
 
-    return this.delegate();
-  }
+    options.transforms.concat(options.transforms, transforms);
 
-  delegate() {
-    return delegateToSchema(this.stitchOptions);
+    return delegateToSchema(options);
   }
 
   /** Creates a new Stitcher object based on the original Stitcher object settings. This function is
@@ -132,7 +147,7 @@ class Stitcher extends DataSource {
    * source initialization, but can be overridden.
    * @returns {Stitcher} a Stitcher object instance for chaining.
    */
-  stitch(options) {
+  from(options) {
     if (!options.info) options = { info: options };
     return new this.constructor({
       ...this.stitchOptions,
@@ -147,22 +162,30 @@ class Stitcher extends DataSource {
    * @param {object} [options.args] named arguments for the query.
    * @param {string|object|function} [options.selectionSet] - a selection set specified as graphql SDL
    * or as an AST. Alternatively, selectionSet may represent a function that returns a post-"stitch" selection set.
-   * @param {function} [options.extractor] - a function that takes the result as a parameter and
-   * returns the desired result, for use in combination with selectionSet to wrap queries prior to
-   * stitching and unwrap the result.
    * @param {object[]} [options.transforms] - additional transforms to be added for this "stitch."
    * @returns {Promise} a promise that will resolve to the graphql result.
    */
   execute(options) {
-    return this.stitch({
-      fieldNodes: [],
-      schema: this.stitchOptions.schema,
-      fragments: {},
-      operation: {
-        variableDefinitions: []
-      },
-      variableValues: {}
-    }).to(options);
+    const stitch = this.from({
+      info: {
+        fieldNodes: [],
+        schema: this.stitchOptions.schema,
+        fragments: {},
+        operation: {
+          variableDefinitions: []
+        },
+        variableValues: {}
+      }
+    });
+
+    const { selectionSet, ...rest } = options;
+    if (selectionSet) {
+      stitch.transform({
+        selectionSet: () => selectionSetToAST(options.selectionSet)
+      });
+    }
+
+    return stitch.delegateTo(rest);
   }
 }
 

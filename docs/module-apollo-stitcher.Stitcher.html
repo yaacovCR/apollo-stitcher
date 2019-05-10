@@ -308,11 +308,13 @@
 
     <h5>Examples</h5>
     
-    <pre class="prettyprint"><code>// execute query on targetSchema directly without working from current// info object.myStitcher.execute(args, ...options)</code></pre>
+    <pre class="prettyprint"><code>// execute query on targetSchema directly without working from current// info object.myStitcher.execute({operation, fieldName, selectionSet, args})</code></pre>
 
-    <pre class="prettyprint"><code>// stitch current query to targetSchema, i.e. pass the remaining// selectionSet to the target schemamyStitcher.stitch(info).to({args, ...options})</code></pre>
+    <pre class="prettyprint"><code>// stitch current query to targetSchema, i.e. pass the remaining// selectionSet to the target schemamyStitcher.from(info).delegateTo({operation, fieldName, args})</code></pre>
 
-    <pre class="prettyprint"><code>// For code re-use:// 1. derive a custom Stitcher class from the base Stitcher class// 2. add a toCustomMethod that calls the "to" method with predefined options// 3. use the parent from() method to add resolver-specific optionsmyStitcher.stitch(info).from(options).toCustomMethod(args)</code></pre>
+    <pre class="prettyprint"><code>// stitch current query to targetSchema, transform prior to delegationmyStitcher.from(info).transform({selectionSet, result}).delegateTo({operation, fieldName, args})</code></pre>
+
+    <pre class="prettyprint"><code>// For code re-use:// 1. derive a custom Stitcher class from the base Stitcher class// 2. add a custom delegator with any required transformsmyStitcher.from(info).delegateToFieldWithTransforms(args)</code></pre>
 
 
 
@@ -335,6 +337,314 @@
 
     
         <h3 class="subsection-title">Methods</h3>
+
+        
+            
+
+    
+
+    
+    <h4 class="name" id="delegateTo"><span class="type-signature"></span>delegateTo<span class="signature">(options)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    
+
+    
+
+
+
+<div class="description">
+    Delegates to the configured target schema.
+</div>
+
+
+
+
+
+
+
+
+
+    <h5>Parameters:</h5>
+    
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>options</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+
+            
+
+            <td class="description last">options for schema delegation to the specified target field.
+                <h6>Properties</h6>
+                
+
+<table class="params">
+    <thead>
+    <tr>
+        
+        <th>Name</th>
+        
+
+        <th>Type</th>
+
+        
+        <th>Attributes</th>
+        
+
+        
+
+        <th class="last">Description</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    
+
+        <tr>
+            
+                <td class="name"><code>operation</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">one of 'query', 'mutation', or 'subscription'.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>fieldName</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">string</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">root field name on target schema.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>args</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">object</span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">named arguments for the query.</td>
+        </tr>
+
+    
+
+        <tr>
+            
+                <td class="name"><code>transforms</code></td>
+            
+
+            <td class="type">
+            
+                
+<span class="param-type">Array.&lt;object></span>
+
+
+            
+            </td>
+
+            
+                <td class="attributes">
+                
+                    &lt;optional><br>
+                
+
+                
+
+                
+                </td>
+            
+
+            
+
+            <td class="description last">additional transforms to be added for this "stitch."</td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+            </td>
+        </tr>
+
+    
+    </tbody>
+</table>
+
+
+
+
+
+
+<dl class="details">
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+<h5>Returns:</h5>
+
+        
+<div class="param-desc">
+    a promise that will resolve to the graphql result.
+</div>
+
+
+
+<dl>
+    <dt>
+        Type
+    </dt>
+    <dd>
+        
+<span class="param-type">Promise</span>
+
+
+    </dd>
+</dl>
+
+    
+
+
+
+
 
         
             
@@ -564,39 +874,6 @@
 
         <tr>
             
-                <td class="name"><code>extractor</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">a function that takes the result as a parameter andreturns the desired result, for use in combination with selectionSet to wrap queries prior tostitching and unwrap the result.</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>transforms</code></td>
             
 
@@ -722,264 +999,7 @@
     
 
     
-    <h4 class="name" id="from"><span class="type-signature"></span>from<span class="signature">(options)</span><span class="type-signature"> &rarr; {Stitcher}</span></h4>
-    
-
-    
-
-
-
-<div class="description">
-    Adds additional options to the stitch in progress, designed for adding resolver-specificstitching options to the stitch in progress. In particular, users may extend the Stitcher classand add methods that call the "to" method with pre-defined options, particular to their use cases.Resolver-specific options may then be passed to the custom "to" method using this "from" method.
-</div>
-
-
-
-
-
-
-
-
-
-    <h5>Parameters:</h5>
-    
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>options</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-
-            
-
-            <td class="description last">options for schema delegation from a specific resolver.
-                <h6>Properties</h6>
-                
-
-<table class="params">
-    <thead>
-    <tr>
-        
-        <th>Name</th>
-        
-
-        <th>Type</th>
-
-        
-        <th>Attributes</th>
-        
-
-        
-
-        <th class="last">Description</th>
-    </tr>
-    </thead>
-
-    <tbody>
-    
-
-        <tr>
-            
-                <td class="name"><code>path</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">root field name on target schema.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>selectionSet</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-|
-
-<span class="param-type">object</span>
-|
-
-<span class="param-type">function</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">a selection set specified as graphql SDLor as an AST, in which references to a pseudo-fragment named PreStitch will be expanded with thepre-"stitch" selection set. Alternatively, selectionSet may represent a function that takes thepre-"stitch" selection set AST as an argument and returns a post-"stitch" selection set.</td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-            </td>
-        </tr>
-
-    
-    </tbody>
-</table>
-
-
-
-
-
-
-<dl class="details">
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-
-    
-</dl>
-
-
-
-
-
-
-
-
-
-
-
-
-
-<h5>Returns:</h5>
-
-        
-<div class="param-desc">
-    a Stitcher object instance for chaining.
-</div>
-
-
-
-<dl>
-    <dt>
-        Type
-    </dt>
-    <dd>
-        
-<span class="param-type">Stitcher</span>
-
-
-    </dd>
-</dl>
-
-    
-
-
-
-
-    <h5>Example</h5>
-    
-    <pre class="prettyprint"><code>myStitcher.stitch(info).from(options).toCustomMethod(args)</code></pre>
-
-
-
-        
-            
-
-    
-
-    
-    <h4 class="name" id="stitch"><span class="type-signature"></span>stitch<span class="signature">(info<span class="signature-attributes">opt</span>, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Stitcher}</span></h4>
+    <h4 class="name" id="from"><span class="type-signature"></span>from<span class="signature">(info<span class="signature-attributes">opt</span>, options<span class="signature-attributes">opt</span>)</span><span class="type-signature"> &rarr; {Stitcher}</span></h4>
     
 
     
@@ -1268,7 +1288,7 @@
     
 
     
-    <h4 class="name" id="to"><span class="type-signature"></span>to<span class="signature">(options)</span><span class="type-signature"> &rarr; {Promise}</span></h4>
+    <h4 class="name" id="transform"><span class="type-signature"></span>transform<span class="signature">(options)</span><span class="type-signature"> &rarr; {Stitcher}</span></h4>
     
 
     
@@ -1276,7 +1296,7 @@
 
 
 <div class="description">
-    Stitches to the configured target schema.
+    Transform the selection set prior to delegation. Options can be specified to transform therequested selection set prior to delegation and/or to reverse the transformation on receipt ofthe result. Multiple transformations can be performed; selection set transformations are appliedsequentially, while result tranformation reversals are processed in reverse order.
 </div>
 
 
@@ -1328,7 +1348,7 @@
 
             
 
-            <td class="description last">options for schema delegation to the specified target field.
+            <td class="description last">options for selectionSet transformation.
                 <h6>Properties</h6>
                 
 
@@ -1356,101 +1376,6 @@
 
         <tr>
             
-                <td class="name"><code>operation</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">one of 'query', 'mutation', or 'subscription'.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>fieldName</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">string</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">root field name on target schema.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>args</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">object</span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">named arguments for the query.</td>
-        </tr>
-
-    
-
-        <tr>
-            
                 <td class="name"><code>selectionSet</code></td>
             
 
@@ -1472,8 +1397,6 @@
             
                 <td class="attributes">
                 
-                    &lt;optional><br>
-                
 
                 
 
@@ -1483,14 +1406,14 @@
 
             
 
-            <td class="description last">a selection set specified as graphql SDLor as an AST, in which references to a pseudo-fragment named PreStitch will be expanded with thepre-"stitch" selection set. Alternatively, selectionSet may represent a function that takes thepre-"stitch" selection set AST as an argument and returns a post-"stitch" selection set.</td>
+            <td class="description last">a selection set specified as graphql SDLor as an AST, in which references to a pseudo-fragment named PreStitch will be expanded with thepre-"stitch" selection set. Alternatively, selectionSet may represent a function that takes thepre-"stitch" selection set AST as an argument and returns a post-"stitch" selection set. Forexample, a selection set can be specified to wrap fields prior to delegation, or to add fields.</td>
         </tr>
 
     
 
         <tr>
             
-                <td class="name"><code>extractor</code></td>
+                <td class="name"><code>result</code></td>
             
 
             <td class="type">
@@ -1516,40 +1439,7 @@
 
             
 
-            <td class="description last">a function that takes the result as a parameter andreturns the desired result, for use in combination with selectionSet to wrap queries prior tostitching and unwrap the result.</td>
-        </tr>
-
-    
-
-        <tr>
-            
-                <td class="name"><code>transforms</code></td>
-            
-
-            <td class="type">
-            
-                
-<span class="param-type">Array.&lt;object></span>
-
-
-            
-            </td>
-
-            
-                <td class="attributes">
-                
-                    &lt;optional><br>
-                
-
-                
-
-                
-                </td>
-            
-
-            
-
-            <td class="description last">additional transforms to be added for this "stitch."</td>
+            <td class="description last">an optional function to reverse the transformation. Forexample, if the selection set transformation involves wrapping the selection set prior todelegation, this option can be used to automatically unwrap the result.</td>
         </tr>
 
     
@@ -1619,7 +1509,7 @@
 
         
 <div class="param-desc">
-    a promise that will resolve to the graphql result.
+    a Stitcher object instance for chaining.
 </div>
 
 
@@ -1630,7 +1520,7 @@
     </dt>
     <dd>
         
-<span class="param-type">Promise</span>
+<span class="param-type">Stitcher</span>
 
 
     </dd>
@@ -1639,6 +1529,11 @@
     
 
 
+
+
+    <h5>Example</h5>
+    
+    <pre class="prettyprint"><code>myStitcher.from(info).transform({selectionSet, result}).delegateTo({operation, fieldName, args})*</code></pre>
 
 
 
@@ -1658,7 +1553,7 @@
 </div>
 
 <nav>
-    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-apollo-stitcher.html">apollo-stitcher</a></li></ul><h3>Classes</h3><ul><li><a href="module-apollo-stitcher.ApolloClientLink.html">ApolloClientLink</a></li><li><a href="module-apollo-stitcher.Stitcher.html">Stitcher</a></li><li><a href="module-apollo-stitcher.StitchQuery.html">StitchQuery</a></li><li><a href="module-apollo-stitcher.TransformQuery.html">TransformQuery</a></li><li><a href="module-apollo-stitcher.UpdateSelectionSet.html">UpdateSelectionSet</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Motivating Example.html">Motivating Example</a></li><li><a href="tutorial-Precompiling SelectionSet Updaters.html">Precompiling SelectionSet Updaters</a></li><li><a href="tutorial-Request Specific Caching.html">Request Specific Caching</a></li></ul>
+    <h2><a href="index.html">Home</a></h2><h3>Modules</h3><ul><li><a href="module-apollo-stitcher.html">apollo-stitcher</a></li></ul><h3>Classes</h3><ul><li><a href="module-apollo-stitcher.ApolloClientLink.html">ApolloClientLink</a></li><li><a href="module-apollo-stitcher.Stitcher.html">Stitcher</a></li><li><a href="module-apollo-stitcher.TransformQuery.html">TransformQuery</a></li></ul><h3>Tutorials</h3><ul><li><a href="tutorial-Motivating Example.html">Motivating Example</a></li><li><a href="tutorial-Request Specific Caching.html">Request Specific Caching</a></li></ul>
 </nav>
 
 <br class="clear">

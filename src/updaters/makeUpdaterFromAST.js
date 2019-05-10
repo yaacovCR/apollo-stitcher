@@ -62,8 +62,8 @@ function makeUpdaterFromPseudoFragment(pseudoFragment) {
   const options = getOptions(pseudoFragment);
 
   return (selectionSet, fragments) => {
-    if (options.from) {
-      selectionSet = extractFields(selectionSet, options.from.path, fragments);
+    if (options.extract) {
+      selectionSet = extractFields(selectionSet, options.extract.path, fragments);
     }
     return selectionSet;
   };

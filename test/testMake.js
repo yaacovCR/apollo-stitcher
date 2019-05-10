@@ -219,7 +219,7 @@ describe('stitcher', () => {
     it('should not work when using stitching directives with unknown arguments', () => {
       expect(() => {
         stitch`{
-          ...PreStitch @from(unknownArgument: "value")
+          ...PreStitch @extract(unknownArgument: "value")
         }`;
       }).to.throw();
     });
@@ -227,7 +227,7 @@ describe('stitcher', () => {
     it('should not work when using stitching directives with arguments of the wrong type', () => {
       expect(() => {
         stitch`{
-          ...PreStitch @from(path: [1, 2, 3])
+          ...PreStitch @extract(path: [1, 2, 3])
         }`;
       }).to.throw();
     });
@@ -262,7 +262,7 @@ describe('stitcher', () => {
       const options = {
         path: ['customerById'],
         queryTransformer: stitch`{
-          ...PreStitch @from(path: ["address", "outer"])
+          ...PreStitch @extract(path: ["address", "outer"])
         }`
       };
 
@@ -323,7 +323,7 @@ describe('stitcher', () => {
       const options = {
         path: ['customerById'],
         queryTransformer: stitch`{
-          ...PreStitch @from(path: ["outer"])
+          ...PreStitch @extract(path: ["outer"])
         }`,
         fragments
       };

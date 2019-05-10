@@ -2,7 +2,7 @@ const { parse, buildASTSchema, validate } = require('graphql');
 
 const pseudoFragmentSchema = buildASTSchema(
   parse(`
-  directive @from(path: [String!]!) on FRAGMENT_SPREAD
+  directive @extract(path: [String!]!) on FRAGMENT_SPREAD
 
   type Query {
     domain: Boolean
