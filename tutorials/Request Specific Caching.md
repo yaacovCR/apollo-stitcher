@@ -37,3 +37,5 @@ const context = () => {
   };
 }
 ```
+
+See sample repository [yaacovCR/nextjs-graphql-starter](https://github.com/yaacovCR/nextjs-graphql-starter) for greater details.

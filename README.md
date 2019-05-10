@@ -1,37 +1,34 @@
 ### Features
 
 * Apollo datasource approach to schema stitching.
-* Provides straightforward abstraction for adding and wrapping fields prior to delegation.
-* Extract fields as necessary from the source query, including from fragments.
-* Provides simple method for per-request caching using Apollo Client.
+* Straightforward abstraction for extracting, adding and wrapping fields prior to delegation.
+* Per-request caching using Apollo Client.
 
 ### Installation
 
 `npm install graphql apollo-stitcher`
 
-### Getting Started
+### Quick Start
 
 Extend the Stitcher class and define methods specific to your data model...
 
 ```javascript
 const { Stitcher, stitch } = require('apollo-stitcher');
 
-const wrapInsert = stitch`{
-  affected_rows
-  returning {
-    ...PreStitch
-  }
-}`;
-
-const unwrapInsert = result =>
-  result && result.affected_rows ? result.returning[0] : null
+const wrapInsert = {
+  selectionSet: stitch`{
+    affected_rows
+    returning {
+      ...PreStitch
+    }
+  }`,
+  result: result =>
+    result && result.affected_rows ? result.returning[0] : null
+};
 
 class DbStitcher extends Stitcher {
   delegateToInsertUser(args) {
-    return this.transform({
-      selectionSet: wrapInsert,
-      result: unwrapInsert
-    }).delegateTo({
+    return this.transform(wrapInsert).delegateTo({
       operation: 'mutation',
       fieldName: 'insert_user',
       args: {
@@ -61,6 +58,8 @@ const user = await context.dataSources.db.delegateToInsertUser({
   });
 ```
 
-### API and Tutorials
+### API and Demo
 
-See [yaacovcr.github.io/apollo-stitcher](https://yaacovcr.github.io/apollo-stitcher).
+API: [yaacovcr.github.io/apollo-stitcher](https://yaacovcr.github.io/apollo-stitcher).
+
+Demo: [yaacovCR/nextjs-graphql-starter](https://github.com/yaacovCR/nextjs-graphql-starter).

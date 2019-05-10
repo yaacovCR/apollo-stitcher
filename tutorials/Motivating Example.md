@@ -1,30 +1,29 @@
-##### Goals
+##### Goals.
+
 1. Refactor away repetitive referencing of the target schema and context for every delegation.
 2. Provide a central location to define the transforms necessary to succesfully delegate to the target schema.
 3. Provide a powerful and simple abstraction for transforming selection sets.
-4. Ensure that selection set (and result) transformation can be chained, so that specific resolvers could add any additional necessary transformations.
+4. Support selection set (and result) transformation chaining, so that specific resolvers could add any additional necessary transformations.
 
-##### Demonstration of transformations with extracting, wrapping, and adding fields.
+##### Demonstration.
 
-If you extend the Stitcher class and define a method specific to your data model...
+If you extend the Stitcher class and define a transformation and method specific to your data model...
 
 ```javascript
-const wrapInsert = stitch`{
-  affected_rows
-  returning {
-    ...PreStitch
-  }
-}`;
-
-const unwrapInsert = result =>
-  result && result.affected_rows ? result.returning[0] : null
+const wrapInsert = {
+  selectionSet: stitch`{
+    affected_rows
+    returning {
+      ...PreStitch
+    }
+  }`,
+  result: result =>
+    result && result.affected_rows ? result.returning[0] : null
+};
 
 class DbStitcher extends Stitcher {
   delegateToInsertUser(args) {
-    return this.transform({
-      selectionSet: wrapInsert
-      result: unwrapInsert
-    }).delegateTo({
+    return this.transform(wrapInsert).delegateTo({
       operation: 'mutation',
       fieldName: 'insert_user',
       args: {
@@ -54,13 +53,13 @@ const addPassword = stitch`{
 
 const user = await context.dataSources.db
   .from(info)
-  .transform({
-    selectionSet: addPassword
-  })
+  .transform({ selectionSet: addPassword })
   .delegateToInsertUser({
     email: lowerCaseEmail,
     password: hashedPassword
   });
 ```
 
-The `selectionSet` tagged string literal with its `PreStitch` pseudo-fragment provides a simple abstraction for adding and wrapping fields.
+The `selectionSet` tagged string literal with its `PreStitch` pseudo-fragment, used twice as above provides a simple abstraction for extracting, adding and wrapping fields, allowing combination of a password check and return of the logged in user details.
+
+See sample repository [yaacovCR/nextjs-graphql-starter](https://github.com/yaacovCR/nextjs-graphql-starter) for greater details.

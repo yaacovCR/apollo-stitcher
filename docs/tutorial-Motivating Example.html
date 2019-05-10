@@ -28,29 +28,27 @@
 </header>
 
 <article>
-    <h5>Goals</h5><ol>
+    <h5>Goals.</h5><ol>
 <li>Refactor away repetitive referencing of the target schema and context for every delegation.</li>
 <li>Provide a central location to define the transforms necessary to succesfully delegate to the target schema.</li>
 <li>Provide a powerful and simple abstraction for transforming selection sets.</li>
-<li>Ensure that selection set (and result) transformation can be chained, so that specific resolvers could add any additional necessary transformations.</li>
+<li>Support selection set (and result) transformation chaining, so that specific resolvers could add any additional necessary transformations.</li>
 </ol>
-<h5>Demonstration of transformations with extracting, wrapping, and adding fields.</h5><p>If you extend the Stitcher class and define a method specific to your data model...</p>
-<pre class="prettyprint source lang-javascript"><code>const wrapInsert = stitch`{
-  affected_rows
-  returning {
-    ...PreStitch
-  }
-}`;
-
-const unwrapInsert = result =>
-  result && result.affected_rows ? result.returning[0] : null
+<h5>Demonstration.</h5><p>If you extend the Stitcher class and define a transformation and method specific to your data model...</p>
+<pre class="prettyprint source lang-javascript"><code>const wrapInsert = {
+  selectionSet: stitch`{
+    affected_rows
+    returning {
+      ...PreStitch
+    }
+  }`,
+  result: result =>
+    result && result.affected_rows ? result.returning[0] : null
+};
 
 class DbStitcher extends Stitcher {
   delegateToInsertUser(args) {
-    return this.transform({
-      selectionSet: wrapInsert
-      result: unwrapInsert
-    }).delegateTo({
+    return this.transform(wrapInsert).delegateTo({
       operation: 'mutation',
       fieldName: 'insert_user',
       args: {
@@ -70,13 +68,12 @@ class DbStitcher extends Stitcher {
 
 const user = await context.dataSources.db
   .from(info)
-  .transform({
-    selectionSet: addPassword
-  })
+  .transform({ selectionSet: addPassword })
   .delegateToInsertUser({
     email: lowerCaseEmail,
     password: hashedPassword
-  });</code></pre><p>The <code>selectionSet</code> tagged string literal with its <code>PreStitch</code> pseudo-fragment provides a simple abstraction for adding and wrapping fields.</p>
+  });</code></pre><p>The <code>selectionSet</code> tagged string literal with its <code>PreStitch</code> pseudo-fragment, used twice as above provides a simple abstraction for extracting, adding and wrapping fields, allowing combination of a password check and return of the logged in user details.</p>
+<p>See sample repository <a href="https://github.com/yaacovCR/nextjs-graphql-starter">yaacovCR/nextjs-graphql-starter</a> for greater details.</p>
 </article>
 
 </section>
