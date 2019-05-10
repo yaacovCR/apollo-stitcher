@@ -232,7 +232,87 @@ describe('stitcher', () => {
       }).to.throw();
     });
 
-    it('should work when using stitching directives with the from argument', () => {
+    it('should work when using using the match directive', () => {
+      const document = parse(`
+        query customerQuery($id: ID!) {
+          customerById(id: $id) {
+            id
+            name
+            address
+          }
+        }
+      `);
+
+      const options = {
+        path: ['customerById'],
+        queryTransformer: stitch`{
+          ...PreStitch @match(pattern: "address")
+        }`
+      };
+
+      const transform = new TransformQuery(options);
+
+      const transformedOperation = transform.transformRequest({
+        document,
+        variables: {
+          id: 'c1'
+        }
+      });
+
+      const expectedDocument = parse(`
+        query customerQuery($id: ID!) {
+          customerById(id: $id) {
+            address
+          }
+        }
+      `);
+
+      expect(print(transformedOperation.document)).to.equal(
+        print(expectedDocument)
+      );
+    });
+
+    it('should work when using using the match directive', () => {
+      const document = parse(`
+        query customerQuery($id: ID!) {
+          customerById(id: $id) {
+            id
+            name
+            address
+          }
+        }
+      `);
+
+      const options = {
+        path: ['customerById'],
+        queryTransformer: stitch`{
+          ...PreStitch @match(pattern: "address", replace: "renamedAddress")
+        }`
+      };
+
+      const transform = new TransformQuery(options);
+
+      const transformedOperation = transform.transformRequest({
+        document,
+        variables: {
+          id: 'c1'
+        }
+      });
+
+      const expectedDocument = parse(`
+        query customerQuery($id: ID!) {
+          customerById(id: $id) {
+            renamedAddress
+          }
+        }
+      `);
+
+      expect(print(transformedOperation.document)).to.equal(
+        print(expectedDocument)
+      );
+    });
+
+    it('should work when using the extract directive', () => {
       const document = parse(`
         query customerQuery($id: ID!) {
           customerById(id: $id) {
@@ -282,6 +362,49 @@ describe('stitcher', () => {
             inner2
             inner3
             inner4
+          }
+        }
+      `);
+
+      expect(print(transformedOperation.document)).to.equal(
+        print(expectedDocument)
+      );
+    });
+
+    it('should fail silently when using the extract directive with no selection set at path', () => {
+      const document = parse(`
+        query customerQuery($id: ID!) {
+          customerById(id: $id) {
+            address {
+              outer {
+                inner
+              }
+            }
+          }
+        }
+      `);
+
+      const options = {
+        path: ['customerById'],
+        queryTransformer: stitch`{
+          id
+          ...PreStitch @extract(path: ["address", "wrongOuter"])
+        }`
+      };
+
+      const transform = new TransformQuery(options);
+
+      const transformedOperation = transform.transformRequest({
+        document,
+        variables: {
+          id: 'c1'
+        }
+      });
+
+      const expectedDocument = parse(`
+        query customerQuery($id: ID!) {
+          customerById(id: $id) {
+            id
           }
         }
       `);

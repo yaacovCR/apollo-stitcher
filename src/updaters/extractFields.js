@@ -30,10 +30,12 @@ function extractFields(selectionSet, path, fragments) {
     }
   });
 
-  return {
-    kind: Kind.SELECTION_SET,
-    selections: newSelections
-  };
+  if (newSelections.length) {
+    return {
+      kind: Kind.SELECTION_SET,
+      selections: newSelections
+    };
+  }
 }
 
 module.exports = {

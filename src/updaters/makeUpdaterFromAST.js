@@ -1,6 +1,7 @@
 const { Kind, visit, valueFromASTUntyped } = require('graphql');
 const { validatePseudoFragment } = require('./validatePseudoFragment');
 const { extractFields } = require('./extractFields');
+const { matchFields } = require('./matchFields');
 
 function updateSelectionSet(
   originalSelectionSet,
@@ -14,21 +15,28 @@ function updateSelectionSet(
   };
 
   updateInstructions.forEach(updateInstruction => {
-    const node = updateInstruction.fields.reduceRight((acc, field) => {
-      return {
-        kind: Kind.SELECTION_SET,
-        selections: [
-          {
-            ...field,
-            selectionSet: acc
-          }
-        ]
-      };
-    }, updateInstruction.updater(originalSelectionSet, fragments));
-
-    newSelectionSet.selections = newSelectionSet.selections.concat(
-      node.selections
+    const updatedSelectionSet = updateInstruction.updater(
+      originalSelectionSet,
+      fragments
     );
+
+    if (updatedSelectionSet) {
+      const node = updateInstruction.fields.reduceRight((acc, field) => {
+        return {
+          kind: Kind.SELECTION_SET,
+          selections: [
+            {
+              ...field,
+              selectionSet: acc
+            }
+          ]
+        };
+      }, updatedSelectionSet);
+
+      newSelectionSet.selections = newSelectionSet.selections.concat(
+        node.selections
+      );
+    }
   });
 
   return newSelectionSet;
@@ -49,7 +57,11 @@ function getOptions(pseudoFragment) {
       }
     },
     [Kind.ARGUMENT]: node => {
-      options[directiveName][node.name.value] = valueFromASTUntyped(node.value);
+      const argumentName = node.name.value;
+      options[directiveName][argumentName] = valueFromASTUntyped(node.value);
+      if (directiveName === 'match' && argumentName === 'pattern') {
+        options.match.pattern = new RegExp(options.match.pattern);
+      }
     }
   });
 
@@ -63,7 +75,19 @@ function makeUpdaterFromPseudoFragment(pseudoFragment) {
 
   return (selectionSet, fragments) => {
     if (options.extract) {
-      selectionSet = extractFields(selectionSet, options.extract.path, fragments);
+      selectionSet = extractFields(
+        selectionSet,
+        options.extract.path,
+        fragments
+      );
+    }
+    if (options.match) {
+      selectionSet = matchFields(
+        selectionSet,
+        fragments,
+        options.match.pattern,
+        options.match.replace
+      );
     }
     return selectionSet;
   };
