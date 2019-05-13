@@ -161,7 +161,8 @@ class Stitcher extends DataSource {
    * @param {string} options.fieldName - root field name on target schema.
    * @param {object} [options.args] named arguments for the query.
    * @param {string|object|function} [options.selectionSet] - a selection set specified as graphql SDL
-   * or as an AST. Alternatively, selectionSet may represent a function that returns a post-"stitch" selection set.
+   * or as an AST.
+   * @param {function} [options.result] - an optional function to transform the result.
    * @param {object[]} [options.transforms] - additional transforms to be added for this "stitch."
    * @returns {Promise} a promise that will resolve to the graphql result.
    */
@@ -178,10 +179,14 @@ class Stitcher extends DataSource {
       }
     });
 
-    const { selectionSet, ...rest } = options;
+    const { selectionSet, result, ...rest } = options;
     if (selectionSet) {
       stitch.transform({
-        selectionSet: () => selectionSetToAST(options.selectionSet)
+        selectionSet:
+          typeof selectionSetUpdater === 'string'
+            ? selectionSetToAST(selectionSet)
+            : selectionSet,
+        result: result
       });
     }
 
