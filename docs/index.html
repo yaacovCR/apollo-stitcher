@@ -49,6 +49,9 @@
 <li>Per-request caching using Apollo Client.</li>
 </ul>
 <h3>Installation</h3><p><code>npm install graphql apollo-stitcher</code></p>
+<h3>Links</h3><p>Repository: <a href="https://github.com/yaacovCR/apollo-stitcher">yaacovCR/apollo-stitcher</a>
+API: <a href="https://yaacovcr.github.io/apollo-stitcher">yaacovcr.github.io/apollo-stitcher</a>
+Demo: <a href="https://github.com/yaacovCR/nextjs-graphql-starter">yaacovCR/nextjs-graphql-starter</a></p>
 <h3>Quick Start</h3><p>Extend the Stitcher class and define methods specific to your data model...</p>
 <pre class="prettyprint source lang-javascript"><code>const { Stitcher, stitch } = require('apollo-stitcher');
 
@@ -82,8 +85,7 @@ class DbStitcher extends Stitcher {
 <pre class="prettyprint source lang-javascript"><code>const user = await context.dataSources.db.delegateToInsertUser({
     email: lowerCaseEmail,
     password: hashedPassword
-  });</code></pre><h3>API and Demo</h3><p>API: <a href="https://yaacovcr.github.io/apollo-stitcher">yaacovcr.github.io/apollo-stitcher</a>.</p>
-<p>Demo: <a href="https://github.com/yaacovCR/nextjs-graphql-starter">yaacovCR/nextjs-graphql-starter</a>.</p></article>
+  });</code></pre></article>
     </section>
 
 

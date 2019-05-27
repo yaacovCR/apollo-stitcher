@@ -8,6 +8,12 @@
 
 `npm install graphql apollo-stitcher`
 
+### Links
+
+Repository: [yaacovCR/apollo-stitcher](https://github.com/yaacovCR/apollo-stitcher)
+API: [yaacovcr.github.io/apollo-stitcher](https://yaacovcr.github.io/apollo-stitcher)
+Demo: [yaacovCR/nextjs-graphql-starter](https://github.com/yaacovCR/nextjs-graphql-starter)
+
 ### Quick Start
 
 Extend the Stitcher class and define methods specific to your data model...
@@ -57,9 +63,3 @@ const user = await context.dataSources.db.delegateToInsertUser({
     password: hashedPassword
   });
 ```
-
-### API and Demo
-
-API: [yaacovcr.github.io/apollo-stitcher](https://yaacovcr.github.io/apollo-stitcher).
-
-Demo: [yaacovCR/nextjs-graphql-starter](https://github.com/yaacovCR/nextjs-graphql-starter).
