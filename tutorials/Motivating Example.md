@@ -47,14 +47,15 @@ const dataSources = () => {
 ...you can just do this in your resolver:
 
 ```javascript
-const addPassword = stitch`{
-  ...PreStitch @extract(path: ["session", "loggedInUser"])
-  password
-}`;
+const extractLoggedInUser = {
+  selectionSet: stitch`{
+    ...PreStitch @extract(path: ["session", "loggedInUser"])          
+  }`
+};
 
 const user = await context.dataSources.db
   .from(info)
-  .transform({ selectionSet: addPassword })
+  .transform(extractLoggedInUser)
   .delegateToInsertUser({
     email: lowerCaseEmail,
     password: hashedPassword
