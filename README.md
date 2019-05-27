@@ -11,7 +11,9 @@
 ### Links
 
 Repository: [yaacovCR/apollo-stitcher](https://github.com/yaacovCR/apollo-stitcher)
+
 API: [yaacovcr.github.io/apollo-stitcher](https://yaacovcr.github.io/apollo-stitcher)
+
 Demo: [yaacovCR/nextjs-graphql-starter](https://github.com/yaacovCR/nextjs-graphql-starter)
 
 ### Quick Start
