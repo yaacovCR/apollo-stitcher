@@ -1,11 +1,11 @@
-##### Goals.
+##### Goals
 
 1. Refactor away repetitive referencing of the target schema and context for every delegation.
 2. Provide a central location to define the transforms necessary to succesfully delegate to the target schema.
 3. Provide a powerful and simple abstraction for transforming selection sets.
 4. Support selection set (and result) transformation chaining, so that specific resolvers could add any additional necessary transformations.
 
-##### Demonstration.
+##### Demonstration
 
 If you extend the Stitcher class and define a transformation and method specific to your data model...
 
@@ -49,6 +49,7 @@ const dataSources = () => {
 ```javascript
 const addPassword = stitch`{
   ...PreStitch @extract(path: ["session", "loggedInUser"])
+  password
 }`;
 
 const user = await context.dataSources.db
@@ -60,6 +61,6 @@ const user = await context.dataSources.db
   });
 ```
 
-The `selectionSet` tagged string literal with its `PreStitch` pseudo-fragment, used twice as above provides a simple abstraction for extracting, adding and wrapping fields, allowing combination of a password check and return of the logged in user details.
+The `selectionSet` tagged string literal and its `PreStitch` pseudo-fragment provide a simple abstraction for extracting, adding and wrapping fields, allowing combination of a password check and return of the logged in user details.
 
-See sample repository [yaacovCR/nextjs-graphql-starter](https://github.com/yaacovCR/nextjs-graphql-starter) for greater details.
+See sample repository [yaacovCR/nextjs-graphql-starter](https://github.com/yaacovCR/nextjs-graphql-starter) for a working example.

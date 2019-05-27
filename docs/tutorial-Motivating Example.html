@@ -28,13 +28,13 @@
 </header>
 
 <article>
-    <h5>Goals.</h5><ol>
+    <h5>Goals</h5><ol>
 <li>Refactor away repetitive referencing of the target schema and context for every delegation.</li>
 <li>Provide a central location to define the transforms necessary to succesfully delegate to the target schema.</li>
 <li>Provide a powerful and simple abstraction for transforming selection sets.</li>
 <li>Support selection set (and result) transformation chaining, so that specific resolvers could add any additional necessary transformations.</li>
 </ol>
-<h5>Demonstration.</h5><p>If you extend the Stitcher class and define a transformation and method specific to your data model...</p>
+<h5>Demonstration</h5><p>If you extend the Stitcher class and define a transformation and method specific to your data model...</p>
 <pre class="prettyprint source lang-javascript"><code>const wrapInsert = {
   selectionSet: stitch`{
     affected_rows
@@ -64,6 +64,7 @@ class DbStitcher extends Stitcher {
 };</code></pre><p>...you can just do this in your resolver:</p>
 <pre class="prettyprint source lang-javascript"><code>const addPassword = stitch`{
   ...PreStitch @extract(path: [&quot;session&quot;, &quot;loggedInUser&quot;])
+  password
 }`;
 
 const user = await context.dataSources.db
@@ -72,8 +73,8 @@ const user = await context.dataSources.db
   .delegateToInsertUser({
     email: lowerCaseEmail,
     password: hashedPassword
-  });</code></pre><p>The <code>selectionSet</code> tagged string literal with its <code>PreStitch</code> pseudo-fragment, used twice as above provides a simple abstraction for extracting, adding and wrapping fields, allowing combination of a password check and return of the logged in user details.</p>
-<p>See sample repository <a href="https://github.com/yaacovCR/nextjs-graphql-starter">yaacovCR/nextjs-graphql-starter</a> for greater details.</p>
+  });</code></pre><p>The <code>selectionSet</code> tagged string literal and its <code>PreStitch</code> pseudo-fragment provide a simple abstraction for extracting, adding and wrapping fields, allowing combination of a password check and return of the logged in user details.</p>
+<p>See sample repository <a href="https://github.com/yaacovCR/nextjs-graphql-starter">yaacovCR/nextjs-graphql-starter</a> for a working example.</p>
 </article>
 
 </section>
