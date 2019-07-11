@@ -8,7 +8,7 @@
 
 `npm install graphql apollo-stitcher`
 
-### Links
+### Resources
 
 Repository: [yaacovCR/apollo-stitcher](https://github.com/yaacovCR/apollo-stitcher)
 

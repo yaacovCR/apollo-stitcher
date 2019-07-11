@@ -28,7 +28,7 @@
 </header>
 
 <article>
-    <h5>The Problem</h5><p>Using graphql-tools's <a href="https://www.apollographql.com/docs/graphql-tools/schema-delegation">delegateToSchema</a> method and the <a href="https://www.apollographql.com/docs/graphql-tools/schema-transforms#other">ExtractField and WrapQuery transforms</a> is kind of repetitive.</p>
+    <p>graphql-tools's <a href="https://www.apollographql.com/docs/graphql-tools/schema-delegation">delegateToSchema</a> method and the <a href="https://www.apollographql.com/docs/graphql-tools/schema-transforms#other">ExtractField and WrapQuery transforms</a> make schema delegation a snap, but provide little in the way of code organization and modularization.</p>
 <h5>Goals</h5><ol>
 <li>Refactor away repetitive referencing of the target schema and context for every delegation.</li>
 <li>Provide a powerful but simple abstraction for transforming selection sets.</li>

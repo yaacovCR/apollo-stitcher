@@ -1,6 +1,4 @@
-##### The Problem
-
-Using graphql-tools's [delegateToSchema](https://www.apollographql.com/docs/graphql-tools/schema-delegation) method and the [ExtractField and WrapQuery transforms](https://www.apollographql.com/docs/graphql-tools/schema-transforms#other) is kind of repetitive.
+graphql-tools's [delegateToSchema](https://www.apollographql.com/docs/graphql-tools/schema-delegation) method and the [ExtractField and WrapQuery transforms](https://www.apollographql.com/docs/graphql-tools/schema-transforms#other) make schema delegation a snap, but provide little in the way of code organization and modularization.
 
 ##### Goals
 
