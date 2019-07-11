@@ -1,4 +1,4 @@
-const { makeRemoteExecutableSchema } = require('graphql-tools');
+const { makeRemoteExecutableSchema } = require('graphql-tools-fork');
 const { ApolloLink, execute } = require('apollo-link');
 
 class GraphQLContextLink extends ApolloLink {

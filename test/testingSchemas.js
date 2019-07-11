@@ -2,7 +2,7 @@ const {
   makeExecutableSchema,
   addMockFunctionsToSchema,
   mergeSchemas
-} = require('graphql-tools');
+} = require('graphql-tools-fork');
 const { parse } = require('graphql');
 const { PubSub } = require('graphql-subscriptions');
 

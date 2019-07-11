@@ -1,5 +1,5 @@
 const { DataSource } = require('apollo-datasource');
-const { delegateToSchema } = require('graphql-tools');
+const { delegateToSchema } = require('graphql-tools-fork');
 const { makeUpdater, selectionSetToAST } = require('./updaters');
 const { TransformQuery } = require('./transforms/TransformQuery');
 
