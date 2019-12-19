@@ -167,10 +167,23 @@ class Stitcher extends DataSource {
    * @returns {Promise} a promise that will resolve to the graphql result.
    */
   execute(options) {
+    const schema = this.stitchOptions.schema;
+    
+    let returnType;
+
+    if (options.operation === 'query') {
+      returnType = schema.getQueryType().getFields()[options.fieldName].type;
+    } else if (options.operation === 'mutation') {
+      returnType = schema.getMutationType().getFields()[options.fieldName].type;
+    } else if (options.operation === 'mutation') {
+      returnType = schema.getSubscriptionType().getFields()[options.fieldName].type;
+    }
+
     const stitch = this.from({
       info: {
+        returnType,
         fieldNodes: [],
-        schema: this.stitchOptions.schema,
+        schema,
         fragments: {},
         operation: {
           variableDefinitions: []
