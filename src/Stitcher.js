@@ -1,3 +1,4 @@
+const { Kind } = require('graphql');
 const { DataSource } = require('apollo-datasource');
 const { delegateToSchema } = require('graphql-tools-fork');
 const { makeUpdater, selectionSetToAST } = require('./updaters');
@@ -182,7 +183,14 @@ class Stitcher extends DataSource {
     const stitch = this.from({
       info: {
         returnType,
-        fieldNodes: [],
+        fieldNodes: [{
+          kind: Kind.FIELD,
+          name: {
+            kind: Kind.NAME,
+            value: '__fieldName',
+          },
+          arguments: [],
+        }],
         schema,
         fragments: {},
         operation: {
