@@ -1,12 +1,10 @@
-const {
-  makeExecutableSchema,
-  addMockFunctionsToSchema,
-  mergeSchemas
-} = require('graphql-tools-fork');
+const { makeExecutableSchema } = require('@graphql-tools/schema');
+const { addMocksToSchema } = require('@graphql-tools/mock');
+const { stitchSchemas } = require('@graphql-tools/stitch');
 const { parse } = require('graphql');
 const { PubSub } = require('graphql-subscriptions');
 
-const chirpSchema = makeExecutableSchema({
+let chirpSchema = makeExecutableSchema({
   typeDefs: parse(`
     type Chirp {
       id: ID!
@@ -21,9 +19,9 @@ const chirpSchema = makeExecutableSchema({
   `)
 });
 
-addMockFunctionsToSchema({ schema: chirpSchema });
+chirpSchema = addMocksToSchema({ schema: chirpSchema });
 
-const authorSchema = makeExecutableSchema({
+let authorSchema = makeExecutableSchema({
   typeDefs: parse(`
     type User {
       id: ID!
@@ -49,7 +47,7 @@ const authorSchema = makeExecutableSchema({
   `)
 });
 
-addMockFunctionsToSchema({ schema: authorSchema });
+authorSchema = addMocksToSchema({ schema: authorSchema });
 
 const linkTypeDefs = parse(`
   extend type User {
@@ -66,12 +64,12 @@ const linkTypeDefs = parse(`
   }
 `);
 
-const mergedSchema = mergeSchemas({
-  schemas: [chirpSchema, authorSchema, linkTypeDefs],
+const mergedSchema = stitchSchemas({
+  subschemas: [chirpSchema, authorSchema, linkTypeDefs],
   resolvers: {
     User: {
       chirps: {
-        fragment: `... on User { id }`,
+        selectionSet: `{ id }`,
         resolve(user, args, context, info) {
           return context.chirpStitcher.from({ info, context }).delegateTo({
             operation: 'query',
@@ -83,7 +81,7 @@ const mergedSchema = mergeSchemas({
         }
       },
       latestDetails: {
-        fragment: `... on User { id }`,
+        selectionSet: `{ id }`,
         resolve(user, args, context, info) {
           return {
             address: context.authorStitcher
@@ -112,7 +110,7 @@ const mergedSchema = mergeSchemas({
     },
     Chirp: {
       author: {
-        fragment: `... on Chirp { authorId }`,
+        selectionSet: `{ authorId }`,
         resolve(chirp, args, context, info) {
           return context.authorStitcher.from({ info, context }).delegateTo({
             operation: 'query',

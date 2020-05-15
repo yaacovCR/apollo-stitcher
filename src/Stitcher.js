@@ -1,6 +1,6 @@
 const { Kind } = require('graphql');
 const { DataSource } = require('apollo-datasource');
-const { delegateToSchema } = require('graphql-tools-fork');
+const { delegateToSchema, createRequest, delegateRequest } = require('@graphql-tools/delegate');
 const { makeUpdater, selectionSetToAST } = require('./updaters');
 const { TransformQuery } = require('./transforms/TransformQuery');
 
@@ -99,13 +99,12 @@ class Stitcher extends DataSource {
    * @param {object[]} [options.transforms] - additional transforms to be added for this "stitch."
    * @returns {Promise} a promise that will resolve to the graphql result.
    */
-  delegateTo({ operation, fieldName, args, transforms }) {
-    const options = this.stitchOptions;
-    options.operation = operation;
-    options.fieldName = fieldName;
-    options.args = args;
-
-    options.transforms = [];
+  delegateTo(options) {
+    const delegationOptions = {
+      ...this.stitchOptions,
+      ...options,
+      transforms: []
+    };
 
     const { queryTransformers, resultTransformers } = this;
     if (queryTransformers.length) {
@@ -120,19 +119,25 @@ class Stitcher extends DataSource {
           )
         : result => result;
 
-      options.transforms.push(
+        delegationOptions.transforms.push(
         new TransformQuery({
-          path: [options.fieldName],
+          path: [delegationOptions.fieldName],
           queryTransformer: composedQueryTransformer,
           resultTransformer: composedResultTransformer,
-          fragments: options.info.fragments
+          fragments: delegationOptions.info && delegationOptions.info.fragments
         })
       );
     }
 
-    options.transforms.concat(options.transforms, transforms);
+    delegationOptions.transforms.concat(delegationOptions.transforms, options.transforms);
 
-    return delegateToSchema(options);
+    if (delegationOptions.request) {
+      return delegateRequest({
+        ...delegationOptions,
+      });
+    }
+
+    return delegateToSchema(delegationOptions);
   }
 
   /** Creates a new Stitcher object based on the original Stitcher object settings. This function is
@@ -180,27 +185,24 @@ class Stitcher extends DataSource {
       returnType = schema.getSubscriptionType().getFields()[options.fieldName].type;
     }
 
-    const stitch = this.from({
-      info: {
-        returnType,
-        fieldNodes: [{
-          kind: Kind.FIELD,
-          name: {
-            kind: Kind.NAME,
-            value: '__fieldName',
-          },
-          arguments: [],
-        }],
-        schema,
-        fragments: {},
-        operation: {
-          variableDefinitions: []
-        },
-        variableValues: {}
-      }
+    const { operation, fieldName, selectionSet, result, ...rest } = options;
+
+    const request = createRequest({
+      targetOperation: operation,
+      targetFieldName: fieldName,
+      selectionSet: [{
+        kind: Kind.SELECTION_SET,
+        selections: []
+      }],
+    });
+    
+    const stitch = new this.constructor({
+      ...this.stitchOptions,
+      ...options,
+      request,
+      returnType,
     });
 
-    const { selectionSet, result, ...rest } = options;
     if (selectionSet) {
       stitch.transform({
         selectionSet:
@@ -211,7 +213,16 @@ class Stitcher extends DataSource {
       });
     }
 
-    return stitch.delegateTo(rest);
+    return stitch.delegateTo({
+      request,
+      returnType,
+      info: {
+        schema: stitch.stitchOptions.schema
+      },
+      operation,
+      fieldName,
+      ...rest
+    });
   }
 }
 
