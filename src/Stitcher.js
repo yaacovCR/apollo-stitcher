@@ -173,18 +173,6 @@ class Stitcher extends DataSource {
    * @returns {Promise} a promise that will resolve to the graphql result.
    */
   execute(options) {
-    const schema = this.stitchOptions.schema;
-    
-    let returnType;
-
-    if (options.operation === 'query') {
-      returnType = schema.getQueryType().getFields()[options.fieldName].type;
-    } else if (options.operation === 'mutation') {
-      returnType = schema.getMutationType().getFields()[options.fieldName].type;
-    } else if (options.operation === 'mutation') {
-      returnType = schema.getSubscriptionType().getFields()[options.fieldName].type;
-    }
-
     const { operation, fieldName, selectionSet, result, ...rest } = options;
 
     const request = createRequest({
@@ -200,7 +188,6 @@ class Stitcher extends DataSource {
       ...this.stitchOptions,
       ...options,
       request,
-      returnType,
     });
 
     if (selectionSet) {
@@ -215,10 +202,6 @@ class Stitcher extends DataSource {
 
     return stitch.delegateTo({
       request,
-      returnType,
-      info: {
-        schema: stitch.stitchOptions.schema
-      },
       operation,
       fieldName,
       ...rest

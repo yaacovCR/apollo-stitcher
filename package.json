@@ -17,8 +17,8 @@
   "author": "Yaacov Rydzinski",
   "license": "MIT",
   "dependencies": {
-    "@graphql-tools/delegate": "^6.0.0-alpha",
-    "@graphql-tools/wrap": "^6.0.0-alpha",
+    "@graphql-tools/delegate": "canary",
+    "@graphql-tools/wrap": "canary",
     "apollo-datasource": "^0.7.0",
     "apollo-link": "^1.2.14",
     "apollo-utilities": "^1.3.4"
@@ -27,9 +27,9 @@
     "graphql": "^14.0.0 || ^15.0.0"
   },
   "devDependencies": {
-    "@graphql-tools/mock": "^6.0.0-alpha",
-    "@graphql-tools/schema": "^6.0.0-alpha",
-    "@graphql-tools/stitch": "^6.0.0-alpha",
+    "@graphql-tools/mock": "canary",
+    "@graphql-tools/schema": "canary",
+    "@graphql-tools/stitch": "canary",
     "chai": "^4.2.0",
     "graphql": "^14.5.7",
     "graphql-subscriptions": "^1.1.0",
