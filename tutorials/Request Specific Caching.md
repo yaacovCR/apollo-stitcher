@@ -1,19 +1,24 @@
-To accomplish per-request batching or caching, one should define the link used for a remote target schema on a per-request basis. Unfortunately, makeRemoteExecutableSchema from graphql-tools requires a link or fetcher to finish creating resolvers for the schema at the time of executable schema creation. Fortunately, those resolvers and the link provided to them have access to the graphql context, and if the true desired link is on the context, the request can be routed on dynamically with the proper setup.
+In graphql-tools v6, wrapping a remote schema can be easily accomplished by specifying executor and subscriber functions that target a remote schema. graphql-tools provides helper functions that convert Apollo-style links to executors and subscriber functions; simple fetcher functions can also be used.
 
-apollo-stitcher polyfills makeRemoteExecutableSchema to allow for dynamic specification of a link or fetcher on the context. The new dispatcher option should be set to a function that takes the graphql context as a parameter and returns the desired link or fetcher. Under the hood, the polyfill uses a special link that simply calls the dispatcher function at the time of delegation and routes the query to the context-specified link or fetcher. This functionality could be integrated within the graphql-tools library with conversion of the apollo-stitcher approach to TypeScript. Use is as follows:
+To accomplish per-request batching or caching, the executor must be customized on a per-request basis. This is easily done via the context object, which the custom executor can access. The HTTPLinkDataloader link by the Prisma team enables batching and caching; if a new HttpLinkDataloader object is added to each context, the specified executor function can easily use that function to provide per request batching and caching.
+
+Setup is roughly as follows, with per request caching enabled only for queries and mutations.
 
 ```javascript
-const { makeRemoteExecutableSchema } = require('apollo-stitcher');
+const { wrapSchema } = require('@graphql-tools/wrap');
+const { linkToExecutor, linkToSubscriber } = require('@graphql-tools/links');
 const { HTTPLinkDataloader } = require('http-link-dataloader');
+const { WebSocketLink } = require('apollo-link-ws');
 
-const schema = makeRemoteExecutableSchema({
+const schema = wrapSchema({
   schema: await createDbSchema(),
-  dispatcher: context => context.link
+  executor: ({ document, variables, context, info }) => context.executor({ document, variables, context, info}),
+  subscriber: linkToSubscriber(new WebSocketLink({ uri, /* additional options */ }),
 });
 
 const context = () => {
   return {
-    link: new HTTPLinkDataloader({ uri: endpoint })
+    executor: linkToExecutor(new HTTPLinkDataloader({ uri, /* additional options */ })),
   };
 };
 ```
@@ -27,15 +32,15 @@ const { InMemoryCache } = require('apollo-cache-inmemory');
 
 const context = () => {
   return {
-    link: new ApolloClientLink({
+    executor: linkToExecutor(new ApolloClientLink({
       client: new ApolloClient({
         ssrMode: true
         cache: new InMemoryCache(),
         link: linkToRemote
       })
-    })
+    }))
   };
 }
 ```
 
-See sample repository [yaacovCR/nextjs-graphql-starter](https://github.com/yaacovCR/nextjs-graphql-starter) for greater details.
+See sample repository [yaacovCR/nextjs-graphql-starter](https://github.com/yaacovCR/nextjs-graphql-starter) for additional details.
